@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -16,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Home, Settings, Inbox, Moon, Sun, Monitor } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
+import { Link } from "react-router"
+import { NavUser } from "./nav-user"
 
 export function AppSidebar() {
   const { theme, setTheme } = useTheme()
@@ -31,19 +34,19 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<a href="#" />}>
+                <SidebarMenuButton render={<Link to="/" />}>
                   <Home />
                   <span>Home</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<a href="#" />}>
+                <SidebarMenuButton render={<Link to="/inbox" />}>
                   <Inbox />
                   <span>Inbox</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<a href="#" />}>
+                <SidebarMenuButton render={<Link to="/settings" />}>
                   <Settings />
                   <span>Settings</span>
                 </SidebarMenuButton>
@@ -78,7 +81,9 @@ export function AppSidebar() {
           </SidebarMenu>
         </div>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
     </Sidebar>
   )
 }
-
