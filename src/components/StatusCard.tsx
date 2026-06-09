@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus, toggleBookmarkStatus, toggleReaction } from "@/api/endpoints"
 
@@ -96,9 +97,12 @@ export interface Status {
 
 interface StatusCardProps {
   status: Status
+  isDetailed?: boolean
+  isAncestor?: boolean
+  isDescendant?: boolean
 }
 
-export function StatusCard({ status }: StatusCardProps) {
+export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: StatusCardProps) {
   const {
     account,
     content,
@@ -116,6 +120,7 @@ export function StatusCard({ status }: StatusCardProps) {
     bookmarked = false,
   } = status
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   // Very basic fallback if no display name
   const displayName = account.display_name || account.username
@@ -203,8 +208,16 @@ export function StatusCard({ status }: StatusCardProps) {
     : []
 
   return (
-    <div className="mb-4 w-full">
-      <Card className="w-full">
+    <div className={`mb-4 w-full ${isDescendant ? "pl-8 relative before:absolute before:left-4 before:top-0 before:-bottom-8 before:w-0.5 before:bg-border last:before:hidden" : ""}`}>
+      <Card 
+        className={`w-full transition-colors ${!isDetailed ? "cursor-pointer hover:bg-muted/20" : ""} ${isAncestor ? "rounded-b-none border-b-0 mb-0" : ""} ${isDescendant ? "rounded-t-none border-t-0 mt-0" : ""}`}
+        onClick={(e) => {
+          if (isDetailed) return
+          const target = e.target as HTMLElement
+          if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
+          navigate(`/status/${status.id}`)
+        }}
+      >
         <CardHeader className="flex flex-row items-center gap-4 pb-2">
         <Avatar>
           <AvatarImage src={account.avatar} alt={displayName} />

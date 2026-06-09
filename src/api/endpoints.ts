@@ -17,13 +17,16 @@ export const ENDPOINTS = {
   },
   statuses: {
     post: '/api/v1/statuses',
-    detail: (id: string) => `/api/v1/statuses/${id}`,
-    favourite: (id: string) => `/api/v1/statuses/${id}/favourite`,
-    unfavourite: (id: string) => `/api/v1/statuses/${id}/unfavourite`,
+    single: (id: string) => `/api/v1/statuses/${id}`,
+    context: (id: string) => `/api/v1/statuses/${id}/context`,
+    reply: () => `/api/v1/statuses`,
+    quote: () => `/api/v1/statuses`,
     reblog: (id: string) => `/api/v1/statuses/${id}/reblog`,
     unreblog: (id: string) => `/api/v1/statuses/${id}/unreblog`,
+    favourite: (id: string) => `/api/v1/statuses/${id}/favourite`,
+    unfavourite: (id: string) => `/api/v1/statuses/${id}/unfavourite`,
     bookmark: (id: string) => `/api/v1/statuses/${id}/bookmark`,
-    unbookmark: (id: string) => `/api/v1/statuses/${id}/unbookmark`,
+    unbookmark: (id: string) => `/api/v1/bookmarks/${id}`,
   },
   reactions: {
     add: (id: string, emoji: string) => `/api/v1/pleroma/statuses/${id}/reactions/${emoji}`,
@@ -130,4 +133,17 @@ export async function voteOnPoll(pollId: string, choices: number[]) {
     method: 'POST',
     body: JSON.stringify({ choices })
   })
+}
+
+export async function fetchStatus(id: string) {
+  return apiClient<Status>(ENDPOINTS.statuses.single(id))
+}
+
+export interface StatusContext {
+  ancestors: Status[]
+  descendants: Status[]
+}
+
+export async function fetchStatusContext(id: string) {
+  return apiClient<StatusContext>(ENDPOINTS.statuses.context(id))
 }
