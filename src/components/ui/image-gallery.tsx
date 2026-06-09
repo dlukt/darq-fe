@@ -62,6 +62,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const uniqueGalleryId = React.useId();
 
     const windowSize = useWindowSize();
 
@@ -257,7 +258,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                                 alt={item.alt}
                                 type={item.type}
                                 className="w-full h-full"
-                                layoutId={`image-gallery-${index}`}
+                                layoutId={`image-gallery-${uniqueGalleryId}-${index}`}
                                 onClick={() => handleImageClick(item, index)}
                             />
                         ) : null}
