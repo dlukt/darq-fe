@@ -17,7 +17,7 @@ interface RequestOptions extends RequestInit {
 
 // Ensure you replace this with the actual backend domain or make it configurable.
 // When using Vite proxy, it could be an empty string, letting proxy handle it.
-const BASE_URL = ''
+const BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_BASE_URL || '')
 
 export async function apiClient<T = any>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { params, headers, ...customConfig } = options
