@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus } from "@/api/endpoints"
+import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus, toggleReaction } from "@/api/endpoints"
 
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ImageGallery, type ImageItem } from "@/components/ui/image-gallery"
 import { StatusComposer } from "@/components/StatusComposer"
+import { EmojiPicker } from "@/components/ui/emoji-picker"
 
 import { 
   MessageCircle, 
@@ -125,6 +126,22 @@ export function StatusCard({ status }: StatusCardProps) {
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
     },
   })
+
+  const reactionMutation = useMutation({
+    mutationFn: ({ emoji, isReacted }: { emoji: string; isReacted: boolean }) => 
+      toggleReaction(status.id, emoji, isReacted),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    },
+  })
+
+  const handleReaction = (emoji: string) => {
+    // Check if we already reacted with this emoji
+    // @ts-ignore - Pleroma specific extension
+    const reactions = status.pleroma?.emoji_reactions || []
+    const existing = reactions.find((r: any) => r.name === emoji)
+    reactionMutation.mutate({ emoji, isReacted: !!existing?.me })
+  }
 
   const handleVoteSubmit = () => {
     if (selectedChoices.length === 0 || !poll) return
@@ -354,6 +371,27 @@ export function StatusCard({ status }: StatusCardProps) {
             )}
           </div>
         )}
+        
+        {/* Existing Reactions */}
+        {/* @ts-ignore - Pleroma specific extension */}
+        {status.pleroma?.emoji_reactions?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border/50">
+            {/* @ts-ignore */}
+            {status.pleroma.emoji_reactions.map((reaction: any, i: number) => (
+              <Button
+                key={i}
+                variant={reaction.me ? "secondary" : "outline"}
+                size="sm"
+                className={`h-7 px-2 text-xs flex items-center gap-1 cursor-pointer transition-colors ${reaction.me ? "border-primary/50 bg-primary/10 hover:bg-primary/20" : ""}`}
+                onClick={() => handleReaction(reaction.name)}
+                disabled={reactionMutation.isPending}
+              >
+                <span>{reaction.name}</span>
+                <span className="text-muted-foreground ml-0.5">{reaction.count}</span>
+              </Button>
+            ))}
+          </div>
+        )}
       </CardContent>
       
       {/* Interaction Buttons */}
@@ -395,9 +433,11 @@ export function StatusCard({ status }: StatusCardProps) {
           <Heart className={`h-4 w-4 ${favourited ? "fill-current" : ""} ${favouriteMutation.isPending ? "animate-pulse" : ""}`} />
           {favourites_count > 0 && <span className="text-xs">{favourites_count}</span>}
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
-          <SmilePlus className="h-4 w-4" />
-        </Button>
+        <EmojiPicker onEmojiSelect={handleReaction} closeOnSelect={true}>
+          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+            <SmilePlus className={`h-4 w-4 ${reactionMutation.isPending ? "animate-pulse" : ""}`} />
+          </Button>
+        </EmojiPicker>
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
           <MoreHorizontal className="h-4 w-4" />
         </Button>

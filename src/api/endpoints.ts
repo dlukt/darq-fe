@@ -21,6 +21,10 @@ export const ENDPOINTS = {
     reblog: (id: string) => `/api/v1/statuses/${id}/reblog`,
     unreblog: (id: string) => `/api/v1/statuses/${id}/unreblog`,
   },
+  reactions: {
+    add: (id: string, emoji: string) => `/api/v1/pleroma/statuses/${id}/reactions/${emoji}`,
+    remove: (id: string, emoji: string) => `/api/v1/pleroma/statuses/${id}/reactions/${emoji}`,
+  },
   polls: {
     vote: (id: string) => `/api/v1/polls/${id}/votes`,
   },
@@ -79,6 +83,12 @@ export async function toggleReblogStatus(id: string, isReblogged: boolean) {
 export async function toggleFavouriteStatus(id: string, isFavourited: boolean) {
   return apiClient(isFavourited ? ENDPOINTS.statuses.unfavourite(id) : ENDPOINTS.statuses.favourite(id), {
     method: 'POST'
+  })
+}
+
+export async function toggleReaction(id: string, emoji: string, isReacted: boolean) {
+  return apiClient(isReacted ? ENDPOINTS.reactions.remove(id, emoji) : ENDPOINTS.reactions.add(id, emoji), {
+    method: isReacted ? 'DELETE' : 'PUT'
   })
 }
 
