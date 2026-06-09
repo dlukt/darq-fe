@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -489,19 +489,22 @@ export function StatusComposer() {
                         <Smile className="h-5 w-5" />
                       </Button>
                     } />
-                    <PopoverContent className="w-[320px] p-2" align="start">
-                      <Tabs defaultValue={EMOJI_CATEGORIES[0].name}>
-                        <TabsList className="w-full overflow-x-auto justify-start h-auto flex-nowrap pb-1 no-scrollbar">
-                          {EMOJI_CATEGORIES.map(cat => (
-                            <TabsTrigger key={cat.name} value={cat.name} className="text-xs px-2 py-1 shrink-0">
-                              {cat.name}
-                            </TabsTrigger>
-                          ))}
-                        </TabsList>
+                    <PopoverContent className="w-[320px] min-w-[320px] h-[300px] min-h-[250px] p-2 flex flex-col resize-y overflow-hidden shadow-lg" align="start">
+                      <Tabs defaultValue={EMOJI_CATEGORIES[0].name} className="flex-1 flex flex-col min-h-0">
+                        <ScrollArea className="w-full whitespace-nowrap mb-1">
+                          <TabsList className="w-full justify-start h-auto flex-nowrap pb-1 no-scrollbar bg-transparent">
+                            {EMOJI_CATEGORIES.map(cat => (
+                              <TabsTrigger key={cat.name} value={cat.name} className="text-xs px-2 py-1 shrink-0">
+                                {cat.name}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                          <ScrollBar orientation="horizontal" className="h-1.5" />
+                        </ScrollArea>
                         {EMOJI_CATEGORIES.map(cat => (
-                          <TabsContent key={cat.name} value={cat.name} className="mt-2">
-                            <ScrollArea className="h-48">
-                              <div className="grid grid-cols-8 gap-1">
+                          <TabsContent key={cat.name} value={cat.name} className="mt-0 flex-1 min-h-0 data-[state=active]:flex">
+                            <ScrollArea className="h-full w-full pr-3">
+                              <div className="grid grid-cols-8 gap-1 pb-4">
                                 {cat.emojis.map((emoji, i) => (
                                   <Button 
                                     type="button"

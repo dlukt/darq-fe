@@ -1,8 +1,13 @@
 import { useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { voteOnPoll } from "@/api/endpoints"
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export interface MediaAttachment {
   id: string
@@ -25,6 +30,8 @@ export interface Poll {
   options: PollOption[]
   voters_count: number
   votes_count: number
+  voted?: boolean
+  own_votes?: number[]
 }
 
 export interface Status {
@@ -50,6 +57,7 @@ interface StatusCardProps {
 
 export function StatusCard({ status }: StatusCardProps) {
   const { account, content, created_at, spoiler_text, sensitive, media_attachments, poll } = status
+  const queryClient = useQueryClient()
 
   // Very basic fallback if no display name
   const displayName = account.display_name || account.username
@@ -58,6 +66,29 @@ export function StatusCard({ status }: StatusCardProps) {
   const dateStr = new Date(created_at).toLocaleString()
 
   const [showContent, setShowContent] = useState(!sensitive && !spoiler_text)
+  const [selectedChoices, setSelectedChoices] = useState<number[]>([])
+
+  const voteMutation = useMutation({
+    mutationFn: () => voteOnPoll(poll!.id, selectedChoices),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    }
+  })
+
+  const handleVoteSubmit = () => {
+    if (selectedChoices.length === 0 || !poll) return
+    voteMutation.mutate()
+  }
+
+  const toggleChoice = (index: number) => {
+    if (poll?.multiple) {
+      setSelectedChoices(prev => 
+        prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+      )
+    } else {
+      setSelectedChoices([index])
+    }
+  }
 
   return (
     <Card className="w-full mb-4">
@@ -117,32 +148,90 @@ export function StatusCard({ status }: StatusCardProps) {
             {/* Poll */}
             {poll && (
               <div className="mt-4 space-y-3 border rounded-lg p-4 bg-card shadow-sm">
-                {poll.options.map((option, i) => {
-                  // Mastodon counts votes differently depending on multiple choice.
-                  // For a simple bar, we just do option.votes / total_voters
-                  const percentage = poll.voters_count > 0 
-                    ? Math.round((option.votes_count / poll.voters_count) * 100) 
-                    : 0
-                  
-                  return (
-                    <div key={i} className="space-y-1.5">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium">{option.title}</span>
-                        <span className="font-semibold text-muted-foreground">{percentage}% <span className="font-normal text-xs">({option.votes_count})</span></span>
+                {!poll.expired && !poll.voted ? (
+                  // Interactive Voting UI
+                  <div className="space-y-3">
+                    {poll.multiple ? (
+                      <div className="space-y-3">
+                        {poll.options.map((option, i) => (
+                          <div key={i} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`poll-${poll.id}-opt-${i}`} 
+                              checked={selectedChoices.includes(i)}
+                              onCheckedChange={() => toggleChoice(i)}
+                              disabled={voteMutation.isPending}
+                            />
+                            <label htmlFor={`poll-${poll.id}-opt-${i}`} className="text-sm font-medium leading-none cursor-pointer">
+                              {option.title}
+                            </label>
+                          </div>
+                        ))}
                       </div>
-                      <Progress value={percentage} className="h-2" />
+                    ) : (
+                      <RadioGroup 
+                        value={selectedChoices.length > 0 ? selectedChoices[0].toString() : undefined} 
+                        onValueChange={(val) => toggleChoice(parseInt(val))}
+                        disabled={voteMutation.isPending}
+                      >
+                        {poll.options.map((option, i) => (
+                          <div key={i} className="flex items-center space-x-2">
+                            <RadioGroupItem value={i.toString()} id={`poll-${poll.id}-opt-${i}`} />
+                            <label htmlFor={`poll-${poll.id}-opt-${i}`} className="text-sm font-medium leading-none cursor-pointer">
+                              {option.title}
+                            </label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    )}
+                    
+                    <div className="pt-2 flex items-center justify-between">
+                      <Button 
+                        size="sm" 
+                        onClick={handleVoteSubmit} 
+                        disabled={selectedChoices.length === 0 || voteMutation.isPending}
+                      >
+                        {voteMutation.isPending ? "Voting..." : "Vote"}
+                      </Button>
+                      <div className="text-xs text-muted-foreground flex items-center gap-2">
+                        <span>{poll.voters_count} votes</span>
+                      </div>
                     </div>
-                  )
-                })}
-                <div className="text-xs text-muted-foreground pt-2 flex items-center gap-2">
-                  <span>{poll.voters_count} votes</span>
-                  {poll.expired && (
-                    <>
-                      <span>&middot;</span>
-                      <span>Final results</span>
-                    </>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  // Results UI
+                  <div className="space-y-3">
+                    {poll.options.map((option, i) => {
+                      const percentage = poll.voters_count > 0 
+                        ? Math.round((option.votes_count / poll.voters_count) * 100) 
+                        : 0
+                      
+                      const didVoteForThis = poll.own_votes?.includes(i)
+
+                      return (
+                        <div key={i} className="space-y-1.5">
+                          <div className="flex justify-between text-sm">
+                            <span className={`font-medium ${didVoteForThis ? 'text-primary' : ''}`}>
+                              {option.title} {didVoteForThis && '✓'}
+                            </span>
+                            <span className="font-semibold text-muted-foreground">
+                              {percentage}% <span className="font-normal text-xs">({option.votes_count})</span>
+                            </span>
+                          </div>
+                          <Progress value={percentage} className={`h-2 ${didVoteForThis ? '[&>div]:bg-primary' : ''}`} />
+                        </div>
+                      )
+                    })}
+                    <div className="text-xs text-muted-foreground pt-2 flex items-center gap-2">
+                      <span>{poll.voters_count} votes</span>
+                      {poll.expired && (
+                        <>
+                          <span>&middot;</span>
+                          <span>Final results</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

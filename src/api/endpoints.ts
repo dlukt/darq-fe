@@ -19,6 +19,9 @@ export const ENDPOINTS = {
     favourite: (id: string) => `/api/v1/statuses/${id}/favourite`,
     reblog: (id: string) => `/api/v1/statuses/${id}/reblog`,
   },
+  polls: {
+    vote: (id: string) => `/api/v1/polls/${id}/votes`,
+  },
   accounts: {
     detail: (id: string) => `/api/v1/accounts/${id}`,
     statuses: (id: string) => `/api/v1/accounts/${id}/statuses`,
@@ -83,4 +86,11 @@ export async function fetchLocalTimeline(params?: Record<string, any>) {
 
 export async function fetchFederatedTimeline(params?: Record<string, any>) {
   return apiClient(ENDPOINTS.timelines.public, { params })
+}
+
+export async function voteOnPoll(pollId: string, choices: number[]) {
+  return apiClient(ENDPOINTS.polls.vote(pollId), {
+    method: 'POST',
+    body: JSON.stringify({ choices })
+  })
 }
