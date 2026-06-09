@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ImageGallery, type ImageItem } from "@/components/ui/image-gallery"
+import { StatusComposer } from "@/components/StatusComposer"
 
 import { 
   MessageCircle, 
@@ -101,6 +102,7 @@ export function StatusCard({ status }: StatusCardProps) {
 
   const [showContent, setShowContent] = useState(!sensitive && !spoiler_text)
   const [selectedChoices, setSelectedChoices] = useState<number[]>([])
+  const [isReplying, setIsReplying] = useState(false)
 
   const voteMutation = useMutation({
     mutationFn: () => voteOnPoll(poll!.id, selectedChoices),
@@ -142,8 +144,9 @@ export function StatusCard({ status }: StatusCardProps) {
     : []
 
   return (
-    <Card className="mb-4 w-full">
-      <CardHeader className="flex flex-row items-center gap-4 pb-2">
+    <div className="mb-4 w-full">
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center gap-4 pb-2">
         <Avatar>
           <AvatarImage src={account.avatar} alt={displayName} />
           <AvatarFallback>
@@ -340,7 +343,12 @@ export function StatusCard({ status }: StatusCardProps) {
       
       {/* Interaction Buttons */}
       <CardFooter className="flex flex-row flex-wrap items-center justify-between text-muted-foreground pt-0 mt-2">
-        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={`gap-1.5 hover:text-foreground ${isReplying ? "text-foreground bg-muted" : "text-muted-foreground"}`}
+          onClick={() => setIsReplying(!isReplying)}
+        >
           <MessageCircle className="h-4 w-4" />
           {replies_count > 0 && <span className="text-xs">{replies_count}</span>}
         </Button>
@@ -363,5 +371,17 @@ export function StatusCard({ status }: StatusCardProps) {
         </Button>
       </CardFooter>
     </Card>
+    
+    {isReplying && (
+      <div className="mt-2 pl-4 md:pl-12">
+        <StatusComposer 
+          inReplyToId={status.id} 
+          initialContent={`@${account.acct} `} 
+          onSuccess={() => setIsReplying(false)}
+          className="mb-0 border-l-4 border-l-primary/30"
+        />
+      </div>
+    )}
+    </div>
   )
 }

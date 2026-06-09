@@ -63,7 +63,14 @@ const languages = iso6391.getAllCodes().map(code => ({
   label: iso6391.getNativeName(code) || iso6391.getName(code)
 }))
 
-export function StatusComposer() {
+export interface StatusComposerProps {
+  inReplyToId?: string;
+  initialContent?: string;
+  onSuccess?: () => void;
+  className?: string;
+}
+
+export function StatusComposer({ inReplyToId, initialContent = "", onSuccess, className = "mb-6" }: StatusComposerProps = {}) {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -73,7 +80,7 @@ export function StatusComposer() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      content: "",
+      content: initialContent,
       visibility: "public",
       localOnly: false,
       contentType: "text/plain",
@@ -116,9 +123,10 @@ export function StatusComposer() {
   const submitMutation = useMutation({
     mutationFn: postStatus,
     onSuccess: () => {
-      form.reset()
+      form.reset({ content: initialContent })
       setAttachments([])
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
+      if (onSuccess) onSuccess()
     },
     onError: (err) => {
       console.error("Failed to post status", err)
@@ -133,7 +141,8 @@ export function StatusComposer() {
       visibility: values.visibility,
       content_type: values.contentType,
       local: values.localOnly,
-      language: values.language
+      language: values.language,
+      in_reply_to_id: inReplyToId
     }
     
     if (values.showCW && values.contentWarning.trim()) {
@@ -234,7 +243,7 @@ export function StatusComposer() {
   )
 
   return (
-    <Card className="w-full mb-6 border-2 border-primary/10 shadow-sm transition-all focus-within:border-primary/30">
+    <Card className={`w-full border-2 border-primary/10 shadow-sm transition-all focus-within:border-primary/30 ${className}`}>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit(onSubmit)} className="flex gap-4">
           <Avatar className="h-10 w-10 shrink-0">

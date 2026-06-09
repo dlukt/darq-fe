@@ -52,6 +52,7 @@ export interface PostStatusPayload {
   // We will pass `local: true` if needed.
   local?: boolean
   language?: string
+  in_reply_to_id?: string
 }
 
 export async function postStatus(payload: PostStatusPayload) {
