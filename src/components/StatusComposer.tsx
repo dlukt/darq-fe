@@ -19,7 +19,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus } from "lucide-react"
+import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus, Quote } from "lucide-react"
 import { EMOJI_CATEGORIES } from "@/lib/emojis"
 
 type Visibility = "public" | "unlisted" | "private" | "direct"
@@ -65,12 +65,13 @@ const languages = iso6391.getAllCodes().map(code => ({
 
 export interface StatusComposerProps {
   inReplyToId?: string;
+  quoteId?: string;
   initialContent?: string;
   onSuccess?: () => void;
   className?: string;
 }
 
-export function StatusComposer({ inReplyToId, initialContent = "", onSuccess, className = "mb-6" }: StatusComposerProps = {}) {
+export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSuccess, className = "mb-6" }: StatusComposerProps = {}) {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -142,7 +143,8 @@ export function StatusComposer({ inReplyToId, initialContent = "", onSuccess, cl
       content_type: values.contentType,
       local: values.localOnly,
       language: values.language,
-      in_reply_to_id: inReplyToId
+      in_reply_to_id: inReplyToId,
+      quote_id: quoteId
     }
     
     if (values.showCW && values.contentWarning.trim()) {
@@ -252,6 +254,12 @@ export function StatusComposer({ inReplyToId, initialContent = "", onSuccess, cl
           </Avatar>
           
           <div className="flex-1 space-y-3 min-w-0">
+            {quoteId && (
+              <div className="px-3 py-2 bg-muted/50 border-l-4 border-l-primary/50 text-xs text-muted-foreground rounded-r-md flex items-center gap-2">
+                <Quote className="h-3 w-3" />
+                <span>Quoting status</span>
+              </div>
+            )}
             {showCW && (
               <Controller
                 name="contentWarning"

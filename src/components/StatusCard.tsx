@@ -103,6 +103,7 @@ export function StatusCard({ status }: StatusCardProps) {
   const [showContent, setShowContent] = useState(!sensitive && !spoiler_text)
   const [selectedChoices, setSelectedChoices] = useState<number[]>([])
   const [isReplying, setIsReplying] = useState(false)
+  const [isQuoting, setIsQuoting] = useState(false)
 
   const voteMutation = useMutation({
     mutationFn: () => voteOnPoll(poll!.id, selectedChoices),
@@ -356,7 +357,12 @@ export function StatusCard({ status }: StatusCardProps) {
           <Repeat className="h-4 w-4" />
           {reblogs_count > 0 && <span className="text-xs">{reblogs_count}</span>}
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={`gap-1.5 hover:text-foreground ${isQuoting ? "text-foreground bg-muted" : "text-muted-foreground"}`}
+          onClick={() => setIsQuoting(!isQuoting)}
+        >
           <Quote className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="sm" className={`gap-1.5 hover:text-pink-500 ${favourited ? "text-pink-500 fill-current" : "text-muted-foreground"}`}>
@@ -378,6 +384,16 @@ export function StatusCard({ status }: StatusCardProps) {
           inReplyToId={status.id} 
           initialContent={`@${account.acct} `} 
           onSuccess={() => setIsReplying(false)}
+          className="mb-0 border-l-4 border-l-primary/30"
+        />
+      </div>
+    )}
+    
+    {isQuoting && (
+      <div className="mt-2 pl-4 md:pl-12">
+        <StatusComposer 
+          quoteId={status.id} 
+          onSuccess={() => setIsQuoting(false)}
           className="mb-0 border-l-4 border-l-primary/30"
         />
       </div>

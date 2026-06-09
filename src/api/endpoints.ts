@@ -53,6 +53,7 @@ export interface PostStatusPayload {
   local?: boolean
   language?: string
   in_reply_to_id?: string
+  quote_id?: string
 }
 
 export async function postStatus(payload: PostStatusPayload) {
