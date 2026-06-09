@@ -1,4 +1,6 @@
 import { apiClient } from './client'
+import type { Status } from '@/components/StatusCard'
+import type { User } from '@/store/auth'
 
 export const ENDPOINTS = {
   oauthToken: '/oauth/token',
@@ -20,6 +22,8 @@ export const ENDPOINTS = {
     unfavourite: (id: string) => `/api/v1/statuses/${id}/unfavourite`,
     reblog: (id: string) => `/api/v1/statuses/${id}/reblog`,
     unreblog: (id: string) => `/api/v1/statuses/${id}/unreblog`,
+    bookmark: (id: string) => `/api/v1/statuses/${id}/bookmark`,
+    unbookmark: (id: string) => `/api/v1/statuses/${id}/unbookmark`,
   },
   reactions: {
     add: (id: string, emoji: string) => `/api/v1/pleroma/statuses/${id}/reactions/${emoji}`,
@@ -35,11 +39,11 @@ export const ENDPOINTS = {
 }
 
 export async function verifyCredentials() {
-  return apiClient(ENDPOINTS.verifyCredentials)
+  return apiClient<User>(ENDPOINTS.verifyCredentials)
 }
 
 export async function fetchInstanceConfig() {
-  return apiClient(ENDPOINTS.instance)
+  return apiClient<{max_toot_chars?: number}>(ENDPOINTS.instance)
 }
 
 export interface PostStatusPayload {
@@ -87,6 +91,12 @@ export async function toggleFavouriteStatus(id: string, isFavourited: boolean) {
   })
 }
 
+export async function toggleBookmarkStatus(id: string, isBookmarked: boolean) {
+  return apiClient(isBookmarked ? ENDPOINTS.statuses.unbookmark(id) : ENDPOINTS.statuses.bookmark(id), {
+    method: 'POST'
+  })
+}
+
 export async function toggleReaction(id: string, emoji: string, isReacted: boolean) {
   return apiClient(isReacted ? ENDPOINTS.reactions.remove(id, emoji) : ENDPOINTS.reactions.add(id, emoji), {
     method: isReacted ? 'DELETE' : 'PUT'
@@ -97,22 +107,22 @@ export async function uploadMedia(file: File) {
   const formData = new FormData()
   formData.append('file', file)
   
-  return apiClient(ENDPOINTS.media, {
+  return apiClient<{id: string}>(ENDPOINTS.media, {
     method: 'POST',
     body: formData
   })
 }
 
 export async function fetchHomeTimeline(params?: Record<string, string | number | boolean>) {
-  return apiClient(ENDPOINTS.timelines.home, { params })
+  return apiClient<Status[]>(ENDPOINTS.timelines.home, { params })
 }
 
 export async function fetchLocalTimeline(params?: Record<string, string | number | boolean>) {
-  return apiClient(ENDPOINTS.timelines.public, { params: { ...params, local: true } })
+  return apiClient<Status[]>(ENDPOINTS.timelines.public, { params: { ...params, local: true } })
 }
 
 export async function fetchFederatedTimeline(params?: Record<string, string | number | boolean>) {
-  return apiClient(ENDPOINTS.timelines.public, { params })
+  return apiClient<Status[]>(ENDPOINTS.timelines.public, { params })
 }
 
 export async function voteOnPoll(pollId: string, choices: number[]) {

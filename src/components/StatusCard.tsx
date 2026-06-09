@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus, toggleReaction } from "@/api/endpoints"
+import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus, toggleBookmarkStatus, toggleReaction } from "@/api/endpoints"
 
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -18,7 +18,8 @@ import {
   Heart, 
   SmilePlus, 
   MoreHorizontal,
-  Quote
+  Quote,
+  Bookmark
 } from "lucide-react"
 
 export interface MediaAttachment {
@@ -65,6 +66,7 @@ export interface Status {
   favourites_count?: number
   favourited?: boolean
   reblogged?: boolean
+  bookmarked?: boolean
   account: {
     id: string
     username: string
@@ -92,6 +94,7 @@ export function StatusCard({ status }: StatusCardProps) {
     favourites_count = 0,
     favourited = false,
     reblogged = false,
+    bookmarked = false,
   } = status
   const queryClient = useQueryClient()
 
@@ -122,6 +125,13 @@ export function StatusCard({ status }: StatusCardProps) {
 
   const favouriteMutation = useMutation({
     mutationFn: () => toggleFavouriteStatus(status.id, favourited),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    },
+  })
+
+  const bookmarkMutation = useMutation({
+    mutationFn: () => toggleBookmarkStatus(status.id, bookmarked),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
     },
@@ -162,7 +172,6 @@ export function StatusCard({ status }: StatusCardProps) {
 
   const galleryImages: ImageItem[] = media_attachments
     ? media_attachments.map((media) => {
-        // @ts-expect-error - Akkoma/Mastodon APIs nest dimensions in meta.original
         const original = media.meta?.original
         return {
           src: media.url,
@@ -437,6 +446,16 @@ export function StatusCard({ status }: StatusCardProps) {
             <SmilePlus className={`h-4 w-4 ${reactionMutation.isPending ? "animate-pulse" : ""}`} />
           </Button>
         </EmojiPicker>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={`gap-1.5 hover:text-primary ${bookmarked ? "text-primary" : "text-muted-foreground"}`}
+          onClick={() => bookmarkMutation.mutate()}
+          disabled={bookmarkMutation.isPending}
+        >
+          <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
+        </Button>
+
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
