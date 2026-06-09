@@ -140,6 +140,6 @@
   
   /* Status Content Hashtag Styling */
   .prose a.hashtag {
-    @apply inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 hover:no-underline;
+    @apply inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 hover:no-underline;
   }
 }
