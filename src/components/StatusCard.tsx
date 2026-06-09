@@ -53,6 +53,23 @@ export interface Poll {
   own_votes?: number[]
 }
 
+export interface PreviewCard {
+  url: string
+  title: string
+  description: string
+  type: "link" | "photo" | "video" | "rich"
+  author_name?: string
+  author_url?: string
+  provider_name?: string
+  provider_url?: string
+  html?: string
+  width?: number
+  height?: number
+  image?: string | null
+  embed_url?: string
+  blurhash?: string
+}
+
 export interface Status {
   id: string
   created_at: string
@@ -60,6 +77,7 @@ export interface Status {
   spoiler_text?: string
   sensitive?: boolean
   media_attachments?: MediaAttachment[]
+  card?: PreviewCard | null
   poll?: Poll
   replies_count?: number
   reblogs_count?: number
@@ -88,6 +106,7 @@ export function StatusCard({ status }: StatusCardProps) {
     spoiler_text,
     sensitive,
     media_attachments,
+    card,
     poll,
     replies_count = 0,
     reblogs_count = 0,
@@ -238,6 +257,47 @@ export function StatusCard({ status }: StatusCardProps) {
             {galleryImages.length > 0 && (
               <div className="mt-4">
                 <ImageGallery images={galleryImages} lazyLoading={true} />
+              </div>
+            )}
+
+            {/* Card (Link Preview or Rich Media) */}
+            {card && (
+              <div className="mt-4 overflow-hidden rounded-lg border bg-card">
+                {card.html ? (
+                  <div 
+                    className="aspect-video w-full [&>iframe]:h-full [&>iframe]:w-full"
+                    dangerouslySetInnerHTML={{ __html: card.html }}
+                  />
+                ) : (
+                  <a 
+                    href={card.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="block transition-colors hover:bg-muted/50"
+                  >
+                    {card.image && (
+                      <div className="aspect-[1.91/1] w-full bg-muted relative">
+                        <img 
+                          src={card.image} 
+                          alt={card.title} 
+                          className="h-full w-full object-cover" 
+                          loading="lazy" 
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="line-clamp-1 font-semibold">{card.title}</h3>
+                      {card.description && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{card.description}</p>
+                      )}
+                      {(card.provider_name || card.author_name) && (
+                        <p className="mt-2 text-xs text-muted-foreground truncate">
+                          {card.provider_name} {card.provider_name && card.author_name ? "·" : ""} {card.author_name}
+                        </p>
+                      )}
+                    </div>
+                  </a>
+                )}
               </div>
             )}
 
