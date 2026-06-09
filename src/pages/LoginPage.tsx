@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate, Link } from "react-router"
 import { useMutation } from "@tanstack/react-query"
 import { apiClient } from "@/api/client"
 import { ENDPOINTS, verifyCredentials } from "@/api/endpoints"
@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+
+import { ensureAppRegistered } from "@/api/auth"
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -20,23 +22,26 @@ export function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async () => {
-      // 1. Obtain Token
+      const { clientId, clientSecret } = await ensureAppRegistered()
+
+      // 2. Obtain Token using FormData
+      const tokenForm = new FormData()
+      tokenForm.append("client_id", clientId)
+      tokenForm.append("client_secret", clientSecret)
+      tokenForm.append("grant_type", "password")
+      tokenForm.append("username", username)
+      tokenForm.append("password", password)
+
       const tokenResponse = await apiClient(ENDPOINTS.oauthToken, {
         method: "POST",
-        body: JSON.stringify({
-          client_id: "test", // Typically you would register an app and get a real client_id/secret
-          client_secret: "test",
-          grant_type: "password",
-          username,
-          password,
-        }),
+        body: tokenForm,
       })
 
-      // 2. Set token temporarily to fetch user
+      // 3. Set token temporarily to fetch user
       const accessToken = tokenResponse.access_token
       setToken(accessToken)
 
-      // 3. Fetch user
+      // 4. Fetch user
       const user = await verifyCredentials()
       setUser(user)
 
@@ -66,7 +71,7 @@ export function LoginPage() {
             Enter your username and password to log in to your Akkoma account.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <CardContent className="space-y-4">
             {error && (
               <div className="p-3 text-sm text-red-500 bg-red-100 dark:bg-red-900/30 rounded-md">
@@ -94,7 +99,7 @@ export function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-4">
             <Button
               type="submit"
               className="w-full"
@@ -102,6 +107,12 @@ export function LoginPage() {
             >
               {loginMutation.isPending ? "Logging in..." : "Login"}
             </Button>
+            <div className="text-center text-sm text-muted-foreground w-full">
+              Don't have an account?{" "}
+              <Link to="/register" className="underline underline-offset-4 hover:text-primary">
+                Sign up
+              </Link>
+            </div>
           </CardFooter>
         </form>
       </Card>

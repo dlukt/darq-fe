@@ -2,7 +2,9 @@ import { apiClient } from './client'
 
 export const ENDPOINTS = {
   oauthToken: '/oauth/token',
+  registerApp: '/api/v1/apps',
   register: '/api/v1/accounts',
+  captcha: '/api/v1/pleroma/captcha',
   verifyCredentials: '/api/v1/accounts/verify_credentials',
   timelines: {
     public: '/api/v1/timelines/public',

@@ -27,8 +27,10 @@ export async function apiClient<T = any>(endpoint: string, options: RequestOptio
   const config: RequestInit = {
     ...customConfig,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      ...(customConfig.body instanceof FormData ? {} : {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }),
       ...(token && { 'Authorization': `Bearer ${token}` }),
       ...headers,
     },

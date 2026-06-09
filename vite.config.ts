@@ -11,4 +11,29 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://akkoma.local",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/oauth": {
+        target: "https://akkoma.local",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/nodeinfo": {
+        target: "https://akkoma.local",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/socket": {
+        target: "https://akkoma.local",
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

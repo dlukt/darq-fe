@@ -28,6 +28,24 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/store/auth"
 
+import React from "react"
+
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error }
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div className="p-2 text-red-500 bg-red-100 text-xs rounded break-all">{this.state.error?.toString()}</div>
+    }
+    return this.props.children
+  }
+}
+
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { user, logout } = useAuthStore()
@@ -57,14 +75,14 @@ export function NavUser() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <ErrorBoundary>
+          <DropdownMenu>
           <DropdownMenuTrigger render={
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            />
-          }>
-            <Avatar className="h-8 w-8 rounded-lg">
+            >
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={displayName} />
                 <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
               </Avatar>
@@ -73,25 +91,28 @@ export function NavUser() {
                 <span className="truncate text-xs">@{user.acct}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
-          </DropdownMenuTrigger>
+            </SidebarMenuButton>
+          } />
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={displayName} />
-                  <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{displayName}</span>
-                  <span className="truncate text-xs">@{user.acct}</span>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user.avatar} alt={displayName} />
+                    <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{displayName}</span>
+                    <span className="truncate text-xs">@{user.acct}</span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
@@ -105,7 +126,8 @@ export function NavUser() {
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </ErrorBoundary>
       </SidebarMenuItem>
     </SidebarMenu>
   )
