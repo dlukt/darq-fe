@@ -2,6 +2,10 @@ import { useState, useRef } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { fetchInstanceConfig, postStatus, uploadMedia, type PostStatusPayload } from "@/api/endpoints"
 import { useAuthStore } from "@/store/auth"
+import { useForm, Controller, useFieldArray } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -15,7 +19,6 @@ import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus } from "lucide-react"
 
-// A custom lightweight emoji grid
 const COMMON_EMOJIS = ["😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🥸","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😮‍💨","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","👍","👎","👏","🙌","🫶","❤️","💔","🔥","✨","🌟","💯"]
 
 type Visibility = "public" | "unlisted" | "private" | "direct"
@@ -28,40 +31,55 @@ interface Attachment {
   error?: boolean
 }
 
-interface PollState {
-  show: boolean
-  options: string[]
-  expiresIn: string // "300" (5m), "3600" (1h), "86400" (1d)
-  multiple: boolean
-}
+const formSchema = z.object({
+  content: z.string(),
+  visibility: z.enum(["public", "unlisted", "private", "direct"]),
+  localOnly: z.boolean(),
+  contentType: z.string(),
+  language: z.string(),
+  showCW: z.boolean(),
+  contentWarning: z.string(),
+  poll: z.object({
+    show: z.boolean(),
+    options: z.array(z.object({ value: z.string() })),
+    expiresIn: z.string(),
+    multiple: z.boolean()
+  })
+})
+
+type FormValues = z.infer<typeof formSchema>
 
 export function StatusComposer() {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Core content
-  const [content, setContent] = useState("")
-  
-  // Settings & Visibility
-  const [visibility, setVisibility] = useState<Visibility>("public")
-  const [localOnly, setLocalOnly] = useState(false)
-  const [contentType, setContentType] = useState("text/plain")
-  const [language, setLanguage] = useState("en")
-  
-  // Content Warning
-  const [showCW, setShowCW] = useState(false)
-  const [contentWarning, setContentWarning] = useState("")
-  
-  // Attachments
+  // Attachments are kept in local state to handle File objects and progress ticks efficiently
   const [attachments, setAttachments] = useState<Attachment[]>([])
-  
-  // Polls
-  const [poll, setPoll] = useState<PollState>({
-    show: false,
-    options: ["", ""],
-    expiresIn: "86400",
-    multiple: false
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      content: "",
+      visibility: "public",
+      localOnly: false,
+      contentType: "text/plain",
+      language: "en",
+      showCW: false,
+      contentWarning: "",
+      poll: {
+        show: false,
+        options: [{ value: "" }, { value: "" }],
+        expiresIn: "86400",
+        multiple: false
+      }
+    }
+  })
+
+  const { control, handleSubmit, watch, setValue } = form
+  const { fields: pollOptions, append: appendPollOption, remove: removePollOption } = useFieldArray({
+    control,
+    name: "poll.options"
   })
 
   const { data: instanceConfig } = useQuery({
@@ -70,21 +88,23 @@ export function StatusComposer() {
     staleTime: 1000 * 60 * 60 * 24,
   })
 
+  const currentContent = watch("content")
+  const showCW = watch("showCW")
+  const currentVisibility = watch("visibility")
+  const currentLocalOnly = watch("localOnly")
+  const currentPollShow = watch("poll.show")
+
   const maxChars = instanceConfig?.max_toot_chars || 5000
-  const remainingChars = maxChars - content.length
+  const remainingChars = maxChars - currentContent.length
   const isOverLimit = remainingChars < 0
   const isUploading = attachments.some(a => a.progress < 100 && !a.error)
-  const isEmpty = content.trim().length === 0 && attachments.length === 0
+  const isEmpty = currentContent.trim().length === 0 && attachments.length === 0
 
   const submitMutation = useMutation({
     mutationFn: postStatus,
     onSuccess: () => {
-      // Reset state
-      setContent("")
-      setContentWarning("")
-      setShowCW(false)
+      form.reset()
       setAttachments([])
-      setPoll({ show: false, options: ["", ""], expiresIn: "86400", multiple: false })
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
     },
     onError: (err) => {
@@ -92,31 +112,31 @@ export function StatusComposer() {
     }
   })
 
-  const handleSubmit = () => {
+  const onSubmit = (values: FormValues) => {
     if (isEmpty || isOverLimit || isUploading) return
     
     const payload: PostStatusPayload = {
-      status: content,
-      visibility,
-      content_type: contentType,
-      local: localOnly
+      status: values.content,
+      visibility: values.visibility,
+      content_type: values.contentType,
+      local: values.localOnly
     }
     
-    if (showCW && contentWarning.trim()) {
-      payload.spoiler_text = contentWarning
+    if (values.showCW && values.contentWarning.trim()) {
+      payload.spoiler_text = values.contentWarning
     }
     
     if (attachments.length > 0) {
       payload.media_ids = attachments.map(a => a.id).filter(Boolean) as string[]
     }
     
-    if (poll.show) {
-      const validOptions = poll.options.filter(o => o.trim().length > 0)
+    if (values.poll.show) {
+      const validOptions = values.poll.options.map(o => o.value).filter(o => o.trim().length > 0)
       if (validOptions.length > 1) {
         payload.poll = {
           options: validOptions,
-          expires_in: parseInt(poll.expiresIn),
-          multiple: poll.multiple
+          expires_in: parseInt(values.poll.expiresIn),
+          multiple: values.poll.multiple
         }
       }
     }
@@ -127,12 +147,12 @@ export function StatusComposer() {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault()
-      handleSubmit()
+      handleSubmit(onSubmit)()
     }
   }
   
   const handleEmojiClick = (emoji: string) => {
-    setContent(prev => prev + emoji)
+    setValue("content", currentContent + emoji, { shouldValidate: true })
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,7 +160,6 @@ export function StatusComposer() {
     
     const files = Array.from(e.target.files)
     
-    // Create local previews instantly
     const newAttachments: Attachment[] = files.map(file => ({
       file,
       preview: URL.createObjectURL(file),
@@ -149,9 +168,6 @@ export function StatusComposer() {
     
     setAttachments(prev => [...prev, ...newAttachments])
     
-    // Simulate upload progress & call API
-    // (In a real scenario with Axios we could use onUploadProgress, 
-    // but with fetch we'll simulate progress while awaiting response)
     for (const newAtt of newAttachments) {
       let simulatedProgress = 10
       const interval = setInterval(() => {
@@ -170,14 +186,12 @@ export function StatusComposer() {
       }
     }
     
-    // Clear input
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
   
   const removeAttachment = (fileToRemove: File) => {
     setAttachments(prev => {
       const remaining = prev.filter(a => a.file !== fileToRemove)
-      // Revoke object URL to prevent memory leaks
       const removed = prev.find(a => a.file === fileToRemove)
       if (removed) URL.revokeObjectURL(removed.preview)
       return remaining
@@ -192,10 +206,11 @@ export function StatusComposer() {
     <Tooltip>
       <TooltipTrigger render={
         <Button 
+          type="button"
           variant="ghost" 
           size="icon" 
-          className={`h-8 w-8 ${visibility === value ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-          onClick={() => setVisibility(value)}
+          className={`h-8 w-8 ${currentVisibility === value ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
+          onClick={() => setValue("visibility", value)}
         >
           <Icon className="h-4 w-4" />
         </Button>
@@ -207,7 +222,7 @@ export function StatusComposer() {
   return (
     <Card className="w-full mb-6 border-2 border-primary/10 shadow-sm transition-all focus-within:border-primary/30">
       <CardContent className="pt-6">
-        <div className="flex gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex gap-4">
           <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={user.avatar} alt={displayName} />
             <AvatarFallback>{displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -215,21 +230,31 @@ export function StatusComposer() {
           
           <div className="flex-1 space-y-3 min-w-0">
             {showCW && (
-              <Input 
-                placeholder="Content Warning (optional)" 
-                value={contentWarning}
-                onChange={e => setContentWarning(e.target.value)}
-                className="bg-muted/50 border-dashed"
+              <Controller
+                name="contentWarning"
+                control={control}
+                render={({ field }) => (
+                  <Input 
+                    {...field}
+                    placeholder="Content Warning (optional)" 
+                    className="bg-muted/50 border-dashed"
+                  />
+                )}
               />
             )}
           
-            <Textarea
-              placeholder={showCW ? "Type your hidden message here..." : "What's on your mind?"}
-              className="resize-none min-h-[100px] text-base border-0 focus-visible:ring-0 p-0"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={submitMutation.isPending}
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  {...field}
+                  placeholder={showCW ? "Type your hidden message here..." : "What's on your mind?"}
+                  className="resize-none min-h-[100px] text-base border-0 focus-visible:ring-0 p-0"
+                  onKeyDown={handleKeyDown}
+                  disabled={submitMutation.isPending}
+                />
+              )}
             />
             
             {/* Attachments Preview Area */}
@@ -252,6 +277,7 @@ export function StatusComposer() {
                     )}
 
                     <Button 
+                      type="button"
                       variant="destructive" 
                       size="icon" 
                       className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity scale-90"
@@ -265,28 +291,42 @@ export function StatusComposer() {
             )}
             
             {/* Poll Creation Area */}
-            {poll.show && (
+            {currentPollShow && (
               <div className="p-3 border rounded-md bg-muted/30 space-y-3">
                 <div className="space-y-2">
-                  {poll.options.map((opt, i) => (
-                    <Input 
-                      key={i}
-                      placeholder={`Choice ${i + 1}`}
-                      value={opt}
-                      onChange={e => {
-                        const newOpts = [...poll.options]
-                        newOpts[i] = e.target.value
-                        setPoll(p => ({ ...p, options: newOpts }))
-                      }}
-                      className="bg-background"
-                    />
+                  {pollOptions.map((field, i) => (
+                    <div key={field.id} className="flex items-center gap-2">
+                      <Controller
+                        name={`poll.options.${i}.value`}
+                        control={control}
+                        render={({ field }) => (
+                          <Input 
+                            {...field}
+                            placeholder={`Choice ${i + 1}`}
+                            className="bg-background"
+                          />
+                        )}
+                      />
+                      {pollOptions.length > 2 && (
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => removePollOption(i)}
+                          className="shrink-0 text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   ))}
-                  {poll.options.length < 4 && (
+                  {pollOptions.length < 4 && (
                     <Button 
+                      type="button"
                       variant="ghost" 
                       size="sm" 
                       className="text-muted-foreground w-full justify-start border border-dashed"
-                      onClick={() => setPoll(p => ({ ...p, options: [...p.options, ""] }))}
+                      onClick={() => appendPollOption({ value: "" })}
                     >
                       <Plus className="mr-2 h-4 w-4" /> Add option
                     </Button>
@@ -294,29 +334,41 @@ export function StatusComposer() {
                 </div>
                 
                 <div className="flex items-center gap-4 pt-2 border-t">
-                  <Select value={poll.expiresIn} onValueChange={(v) => v && setPoll(p => ({ ...p, expiresIn: v }))}>
-                    <SelectTrigger className="w-[120px] h-8 text-xs bg-background">
-                      <SelectValue placeholder="Duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="300">5 Minutes</SelectItem>
-                      <SelectItem value="1800">30 Minutes</SelectItem>
-                      <SelectItem value="3600">1 Hour</SelectItem>
-                      <SelectItem value="86400">1 Day</SelectItem>
-                      <SelectItem value="604800">1 Week</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="poll.expiresIn"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={v => v && field.onChange(v)}>
+                        <SelectTrigger className="w-[120px] h-8 text-xs bg-background">
+                          <SelectValue placeholder="Duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="300">5 Minutes</SelectItem>
+                          <SelectItem value="1800">30 Minutes</SelectItem>
+                          <SelectItem value="3600">1 Hour</SelectItem>
+                          <SelectItem value="86400">1 Day</SelectItem>
+                          <SelectItem value="604800">1 Week</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="multiple" 
-                      checked={poll.multiple}
-                      onCheckedChange={c => setPoll(p => ({ ...p, multiple: !!c }))}
-                    />
-                    <label htmlFor="multiple" className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Multiple choice
-                    </label>
-                  </div>
+                  <Controller
+                    name="poll.multiple"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="multiple" 
+                          checked={field.value}
+                          onCheckedChange={c => field.onChange(!!c)}
+                        />
+                        <label htmlFor="multiple" className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Multiple choice
+                        </label>
+                      </div>
+                    )}
+                  />
                 </div>
               </div>
             )}
@@ -333,10 +385,11 @@ export function StatusComposer() {
                   <Tooltip>
                     <TooltipTrigger render={
                       <Button 
+                        type="button"
                         variant="ghost" 
                         size="icon" 
-                        className={`h-8 w-8 ${localOnly ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-                        onClick={() => setLocalOnly(!localOnly)}
+                        className={`h-8 w-8 ${currentLocalOnly ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
+                        onClick={() => setValue("localOnly", !currentLocalOnly)}
                       >
                         <Users className="h-4 w-4" />
                       </Button>
@@ -346,31 +399,43 @@ export function StatusComposer() {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Select value={language} onValueChange={(v) => v && setLanguage(v)}>
-                    <SelectTrigger className="h-8 w-[70px] text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">EN</SelectItem>
-                      <SelectItem value="es">ES</SelectItem>
-                      <SelectItem value="fr">FR</SelectItem>
-                      <SelectItem value="de">DE</SelectItem>
-                      <SelectItem value="ja">JA</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="language"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={v => v && field.onChange(v)}>
+                        <SelectTrigger className="h-8 w-[70px] text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="en">EN</SelectItem>
+                          <SelectItem value="es">ES</SelectItem>
+                          <SelectItem value="fr">FR</SelectItem>
+                          <SelectItem value="de">DE</SelectItem>
+                          <SelectItem value="ja">JA</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
 
-                  <Select value={contentType} onValueChange={(v) => v && setContentType(v)}>
-                    <SelectTrigger className="h-8 w-[110px] text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text/plain">Plain Text</SelectItem>
-                      <SelectItem value="text/html">HTML</SelectItem>
-                      <SelectItem value="text/markdown">Markdown</SelectItem>
-                      <SelectItem value="text/bbcode">BBCode</SelectItem>
-                      <SelectItem value="text/mfm">MFM</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="contentType"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={v => v && field.onChange(v)}>
+                        <SelectTrigger className="h-8 w-[110px] text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text/plain">Plain Text</SelectItem>
+                          <SelectItem value="text/html">HTML</SelectItem>
+                          <SelectItem value="text/markdown">Markdown</SelectItem>
+                          <SelectItem value="text/bbcode">BBCode</SelectItem>
+                          <SelectItem value="text/mfm">MFM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
               </div>
             </TooltipProvider>
@@ -379,7 +444,6 @@ export function StatusComposer() {
             <TooltipProvider>
               <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center space-x-1">
-                  {/* Hidden File Input */}
                   <input 
                     type="file" 
                     multiple 
@@ -390,17 +454,16 @@ export function StatusComposer() {
                   />
                   <Tooltip>
                     <TooltipTrigger render={
-                      <Button variant="ghost" size="icon" className="text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
+                      <Button type="button" variant="ghost" size="icon" className="text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
                         <Upload className="h-5 w-5" />
                       </Button>
                     } />
                     <TooltipContent>Upload Media</TooltipContent>
                   </Tooltip>
 
-                  {/* Drop Tooltip around Emoji Button to avoid nested render triggers */}
                   <Popover>
                     <PopoverTrigger render={
-                      <Button variant="ghost" size="icon" className="text-muted-foreground" title="Insert Emoji">
+                      <Button type="button" variant="ghost" size="icon" className="text-muted-foreground" title="Insert Emoji">
                         <Smile className="h-5 w-5" />
                       </Button>
                     } />
@@ -410,6 +473,7 @@ export function StatusComposer() {
                         <div className="grid grid-cols-8 gap-1">
                           {COMMON_EMOJIS.map((emoji, i) => (
                             <Button 
+                              type="button"
                               key={i} 
                               variant="ghost" 
                               className="h-8 w-8 p-0 text-xl" 
@@ -426,10 +490,11 @@ export function StatusComposer() {
                   <Tooltip>
                     <TooltipTrigger render={
                       <Button 
+                        type="button"
                         variant="ghost" 
                         size="icon" 
-                        className={`text-muted-foreground ${poll.show ? 'bg-muted' : ''}`}
-                        onClick={() => setPoll(p => ({ ...p, show: !p.show }))}
+                        className={`text-muted-foreground ${currentPollShow ? 'bg-muted' : ''}`}
+                        onClick={() => setValue("poll.show", !currentPollShow)}
                       >
                         <BarChart className="h-5 w-5" />
                       </Button>
@@ -440,10 +505,11 @@ export function StatusComposer() {
                   <Tooltip>
                     <TooltipTrigger render={
                       <Button 
+                        type="button"
                         variant="ghost" 
                         size="icon" 
                         className={`text-muted-foreground ${showCW ? 'bg-muted' : ''}`}
-                        onClick={() => setShowCW(!showCW)}
+                        onClick={() => setValue("showCW", !showCW)}
                       >
                         <EyeOff className="h-5 w-5" />
                       </Button>
@@ -458,9 +524,8 @@ export function StatusComposer() {
                   </span>
                   
                   <Button 
-                    onClick={handleSubmit} 
+                    type="submit"
                     disabled={isEmpty || isOverLimit || submitMutation.isPending || isUploading}
-                    className="px-6 rounded-full font-bold shadow-sm"
                   >
                     {submitMutation.isPending ? "Posting..." : "Post"}
                   </Button>
@@ -472,7 +537,7 @@ export function StatusComposer() {
               <p className="text-sm text-red-500 font-medium">Failed to post status. Please try again.</p>
             )}
           </div>
-        </div>
+        </form>
       </CardContent>
     </Card>
   )
