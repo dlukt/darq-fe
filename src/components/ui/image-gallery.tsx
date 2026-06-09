@@ -89,10 +89,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     }, []);
 
     const noOfColumns = useMemo(() => {
-        if (windowSize.width < 768) return columns.mobile || 1;
-        if (windowSize.width < 1024) return columns.tablet || 2;
-        return columns.desktop as number;
-    }, [windowSize.width, columns.mobile, columns.tablet, columns.desktop]);
+        let cols = columns.desktop as number;
+        if (windowSize.width < 768) cols = columns.mobile || 1;
+        else if (windowSize.width < 1024) cols = columns.tablet || 2;
+        
+        // Ensure we don't create more columns than we have images,
+        // so that 1 or 2 images can expand to fill the full container width.
+        return Math.min(cols, Math.max(1, images.length));
+    }, [windowSize.width, columns.mobile, columns.tablet, columns.desktop, images.length]);
 
     // Randomize dimensions for images that don't have them
     const getRandomDimensions = useCallback(() => {

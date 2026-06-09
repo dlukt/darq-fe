@@ -102,11 +102,18 @@ export function StatusCard({ status }: StatusCardProps) {
   }
 
   const galleryImages: ImageItem[] = media_attachments
-    ? media_attachments.map((media) => ({
-        src: media.url,
-        alt: media.description || "Media attachment",
-        type: media.type,
-      }))
+    ? media_attachments.map((media) => {
+        // Akkoma/Mastodon APIs nest dimensions in meta.original
+        // @ts-ignore
+        const original = media.meta?.original
+        return {
+          src: media.url,
+          alt: media.description || "Media attachment",
+          type: media.type,
+          width: original?.width,
+          height: original?.height,
+        }
+      })
     : []
 
   return (

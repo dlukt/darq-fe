@@ -47,7 +47,11 @@ const useMasonry = (
                 image.width && image.height ? image.width / image.height : 1; // Default to square if dimensions not provided
 
             const displayWidth = columnWidth;
-            const displayHeight = displayWidth / aspectRatio;
+            let displayHeight = displayWidth / aspectRatio;
+            
+            if (displayHeight > 600) {
+                displayHeight = 600;
+            }
 
             columnHeights[columnIndex] += displayHeight + config.gap;
             columnImages[columnIndex]?.push(image);
@@ -69,7 +73,8 @@ const useMasonry = (
                         ? image.width / image.height
                         : 1;
                 const displayWidth = columnWidth;
-                const displayHeight = displayWidth / aspectRatio;
+                let displayHeight = displayWidth / aspectRatio;
+                if (displayHeight > 600) displayHeight = 600;
                 totalImageHeight += displayHeight;
             });
 
@@ -85,9 +90,14 @@ const useMasonry = (
                     image.width && image.height
                         ? image.width / image.height
                         : 1;
-                const displayWidth = columnWidth;
-                const displayHeight =
-                    (displayWidth / aspectRatio) * scaleFactor;
+                
+                let displayWidth = columnWidth;
+                let displayHeight = (displayWidth / aspectRatio) * scaleFactor;
+
+                // Clamp extreme heights for very tall portrait images
+                if (displayHeight > 600) {
+                    displayHeight = 600;
+                }
 
                 const x = colIndex * (columnWidth + config.gap);
                 const y = columnY;
