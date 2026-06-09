@@ -7,17 +7,17 @@ function Progress({
   children,
   value,
   ...props
-}: ProgressPrimitive.Root.Props) {
+}: ProgressPrimitive.Root.Props & { value?: number | null }) {
   return (
     <ProgressPrimitive.Root
-      value={value}
+      value={value ?? null}
       data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
+      className={cn("w-full", className)}
       {...props}
     >
       {children}
       <ProgressTrack>
-        <ProgressIndicator />
+        <ProgressIndicator style={{ width: `${value || 0}%` }} />
       </ProgressTrack>
     </ProgressPrimitive.Root>
   )

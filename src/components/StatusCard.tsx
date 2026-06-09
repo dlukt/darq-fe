@@ -193,7 +193,7 @@ export function StatusCard({ status }: StatusCardProps) {
                         {voteMutation.isPending ? "Voting..." : "Vote"}
                       </Button>
                       <div className="text-xs text-muted-foreground flex items-center gap-2">
-                        <span>{poll.voters_count} votes</span>
+                      <span>{poll.voters_count || poll.votes_count || poll.options.reduce((acc, opt) => acc + opt.votes_count, 0)} votes</span>
                       </div>
                     </div>
                   </div>
@@ -201,8 +201,9 @@ export function StatusCard({ status }: StatusCardProps) {
                   // Results UI
                   <div className="space-y-3">
                     {poll.options.map((option, i) => {
-                      const percentage = poll.voters_count > 0 
-                        ? Math.round((option.votes_count / poll.voters_count) * 100) 
+                      const totalVotes = poll.voters_count || poll.votes_count || poll.options.reduce((acc, opt) => acc + opt.votes_count, 0)
+                      const percentage = totalVotes > 0 
+                        ? Math.round((option.votes_count / totalVotes) * 100) 
                         : 0
                       
                       const didVoteForThis = poll.own_votes?.includes(i)
@@ -222,7 +223,7 @@ export function StatusCard({ status }: StatusCardProps) {
                       )
                     })}
                     <div className="text-xs text-muted-foreground pt-2 flex items-center gap-2">
-                      <span>{poll.voters_count} votes</span>
+                      <span>{poll.voters_count || poll.votes_count || poll.options.reduce((acc, opt) => acc + opt.votes_count, 0)} votes</span>
                       {poll.expired && (
                         <>
                           <span>&middot;</span>
