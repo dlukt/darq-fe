@@ -1,11 +1,11 @@
-import { apiClient, BASE_URL } from "./client"
+import { apiClient } from "./client"
 import { ENDPOINTS } from "./endpoints"
 import { useAuthStore } from "@/store/auth"
 
 export async function ensureAppRegistered() {
   let { clientId, clientSecret, instanceUrl } = useAuthStore.getState()
 
-  const currentEnvUrl = import.meta.env.VITE_BASE_URL || 'default'
+  const currentEnvUrl = (import.meta.env.VITE_BASE_URL || 'default').replace(/\/$/, '')
 
   // If the stored instanceUrl doesn't match the current configured URL, clear the stale credentials.
   // This automatically happens if a developer switches their backend instance in .env

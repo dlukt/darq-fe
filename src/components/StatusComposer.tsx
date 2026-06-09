@@ -14,11 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus, Quote } from "lucide-react"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 
@@ -227,7 +223,7 @@ export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSu
 
   const displayName = user.display_name || user.username
 
-  const VisibilityIcon = ({ value, icon: Icon, label }: { value: Visibility, icon: any, label: string }) => (
+  const VisibilityIcon = ({ value, icon: Icon, label }: { value: Visibility, icon: React.ElementType, label: string }) => (
     <Tooltip>
       <TooltipTrigger render={
         <Button 

@@ -65,6 +65,7 @@ export interface PostStatusPayload {
 export async function postStatus(payload: PostStatusPayload) {
   // Strip out any empty strings from payload to avoid API validation errors
   const cleanPayload = Object.fromEntries(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(payload).filter(([_, v]) => v !== "" && v !== undefined && v !== null)
   )
 
@@ -102,15 +103,15 @@ export async function uploadMedia(file: File) {
   })
 }
 
-export async function fetchHomeTimeline(params?: Record<string, any>) {
+export async function fetchHomeTimeline(params?: Record<string, string | number | boolean>) {
   return apiClient(ENDPOINTS.timelines.home, { params })
 }
 
-export async function fetchLocalTimeline(params?: Record<string, any>) {
+export async function fetchLocalTimeline(params?: Record<string, string | number | boolean>) {
   return apiClient(ENDPOINTS.timelines.public, { params: { ...params, local: true } })
 }
 
-export async function fetchFederatedTimeline(params?: Record<string, any>) {
+export async function fetchFederatedTimeline(params?: Record<string, string | number | boolean>) {
   return apiClient(ENDPOINTS.timelines.public, { params })
 }
 

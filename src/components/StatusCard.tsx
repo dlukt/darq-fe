@@ -137,9 +137,9 @@ export function StatusCard({ status }: StatusCardProps) {
 
   const handleReaction = (emoji: string) => {
     // Check if we already reacted with this emoji
-    // @ts-ignore - Pleroma specific extension
+    // @ts-expect-error - Pleroma specific extension
     const reactions = status.pleroma?.emoji_reactions || []
-    const existing = reactions.find((r: any) => r.name === emoji)
+    const existing = reactions.find((r: { name: string; count: number; me: boolean }) => r.name === emoji)
     reactionMutation.mutate({ emoji, isReacted: !!existing?.me })
   }
 
@@ -162,8 +162,7 @@ export function StatusCard({ status }: StatusCardProps) {
 
   const galleryImages: ImageItem[] = media_attachments
     ? media_attachments.map((media) => {
-        // Akkoma/Mastodon APIs nest dimensions in meta.original
-        // @ts-ignore
+        // @ts-expect-error - Akkoma/Mastodon APIs nest dimensions in meta.original
         const original = media.meta?.original
         return {
           src: media.url,
@@ -373,11 +372,11 @@ export function StatusCard({ status }: StatusCardProps) {
         )}
         
         {/* Existing Reactions */}
-        {/* @ts-ignore - Pleroma specific extension */}
+        {/* @ts-expect-error - Pleroma specific extension */}
         {status.pleroma?.emoji_reactions?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border/50">
-            {/* @ts-ignore */}
-            {status.pleroma.emoji_reactions.map((reaction: any, i: number) => (
+            {/* @ts-expect-error - Pleroma specific extension */}
+            {status.pleroma.emoji_reactions.map((reaction: { name: string; count: number; me: boolean }, i: number) => (
               <Button
                 key={i}
                 variant={reaction.me ? "secondary" : "outline"}
