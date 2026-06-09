@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { voteOnPoll } from "@/api/endpoints"
+import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus } from "@/api/endpoints"
 
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -107,6 +107,20 @@ export function StatusCard({ status }: StatusCardProps) {
 
   const voteMutation = useMutation({
     mutationFn: () => voteOnPoll(poll!.id, selectedChoices),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    },
+  })
+
+  const reblogMutation = useMutation({
+    mutationFn: () => toggleReblogStatus(status.id, reblogged),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    },
+  })
+
+  const favouriteMutation = useMutation({
+    mutationFn: () => toggleFavouriteStatus(status.id, favourited),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
     },
@@ -353,8 +367,14 @@ export function StatusCard({ status }: StatusCardProps) {
           <MessageCircle className="h-4 w-4" />
           {replies_count > 0 && <span className="text-xs">{replies_count}</span>}
         </Button>
-        <Button variant="ghost" size="sm" className={`gap-1.5 hover:text-green-500 ${reblogged ? "text-green-500" : "text-muted-foreground"}`}>
-          <Repeat className="h-4 w-4" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={`gap-1.5 hover:text-green-500 ${reblogged ? "text-green-500" : "text-muted-foreground"}`}
+          onClick={() => reblogMutation.mutate()}
+          disabled={reblogMutation.isPending}
+        >
+          <Repeat className={`h-4 w-4 ${reblogMutation.isPending ? "animate-spin" : ""}`} />
           {reblogs_count > 0 && <span className="text-xs">{reblogs_count}</span>}
         </Button>
         <Button 
@@ -365,8 +385,14 @@ export function StatusCard({ status }: StatusCardProps) {
         >
           <Quote className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm" className={`gap-1.5 hover:text-pink-500 ${favourited ? "text-pink-500 fill-current" : "text-muted-foreground"}`}>
-          <Heart className={`h-4 w-4 ${favourited ? "fill-current" : ""}`} />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className={`gap-1.5 hover:text-pink-500 ${favourited ? "text-pink-500 fill-current" : "text-muted-foreground"}`}
+          onClick={() => favouriteMutation.mutate()}
+          disabled={favouriteMutation.isPending}
+        >
+          <Heart className={`h-4 w-4 ${favourited ? "fill-current" : ""} ${favouriteMutation.isPending ? "animate-pulse" : ""}`} />
           {favourites_count > 0 && <span className="text-xs">{favourites_count}</span>}
         </Button>
         <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">

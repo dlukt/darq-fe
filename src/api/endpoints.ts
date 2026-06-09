@@ -17,7 +17,9 @@ export const ENDPOINTS = {
     post: '/api/v1/statuses',
     detail: (id: string) => `/api/v1/statuses/${id}`,
     favourite: (id: string) => `/api/v1/statuses/${id}/favourite`,
+    unfavourite: (id: string) => `/api/v1/statuses/${id}/unfavourite`,
     reblog: (id: string) => `/api/v1/statuses/${id}/reblog`,
+    unreblog: (id: string) => `/api/v1/statuses/${id}/unreblog`,
   },
   polls: {
     vote: (id: string) => `/api/v1/polls/${id}/votes`,
@@ -65,6 +67,18 @@ export async function postStatus(payload: PostStatusPayload) {
   return apiClient(ENDPOINTS.statuses.post, {
     method: 'POST',
     body: JSON.stringify(cleanPayload)
+  })
+}
+
+export async function toggleReblogStatus(id: string, isReblogged: boolean) {
+  return apiClient(isReblogged ? ENDPOINTS.statuses.unreblog(id) : ENDPOINTS.statuses.reblog(id), {
+    method: 'POST'
+  })
+}
+
+export async function toggleFavouriteStatus(id: string, isFavourited: boolean) {
+  return apiClient(isFavourited ? ENDPOINTS.statuses.unfavourite(id) : ENDPOINTS.statuses.favourite(id), {
+    method: 'POST'
   })
 }
 
