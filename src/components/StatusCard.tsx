@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { voteOnPoll } from "@/api/endpoints"
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -10,12 +10,27 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ImageGallery, type ImageItem } from "@/components/ui/image-gallery"
 
+import { 
+  MessageCircle, 
+  Repeat, 
+  Heart, 
+  SmilePlus, 
+  MoreHorizontal,
+  Quote
+} from "lucide-react"
+
 export interface MediaAttachment {
   id: string
   type: "image" | "video" | "gifv" | "audio" | "unknown"
   url: string
   preview_url: string
   description?: string | null
+  meta?: {
+    original?: {
+      width?: number
+      height?: number
+    }
+  }
 }
 
 export interface PollOption {
@@ -43,6 +58,11 @@ export interface Status {
   sensitive?: boolean
   media_attachments?: MediaAttachment[]
   poll?: Poll
+  replies_count?: number
+  reblogs_count?: number
+  favourites_count?: number
+  favourited?: boolean
+  reblogged?: boolean
   account: {
     id: string
     username: string
@@ -65,6 +85,11 @@ export function StatusCard({ status }: StatusCardProps) {
     sensitive,
     media_attachments,
     poll,
+    replies_count = 0,
+    reblogs_count = 0,
+    favourites_count = 0,
+    favourited = false,
+    reblogged = false,
   } = status
   const queryClient = useQueryClient()
 
@@ -132,7 +157,7 @@ export function StatusCard({ status }: StatusCardProps) {
           </span>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-2">
         {spoiler_text && (
           <div className="mb-3 flex items-center gap-4 rounded-md border border-border/50 bg-muted/40 p-2">
             <span className="flex-1 text-sm font-medium">{spoiler_text}</span>
@@ -312,6 +337,31 @@ export function StatusCard({ status }: StatusCardProps) {
           </div>
         )}
       </CardContent>
+      
+      {/* Interaction Buttons */}
+      <CardFooter className="flex flex-row flex-wrap items-center justify-between text-muted-foreground pt-0 mt-2">
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+          <MessageCircle className="h-4 w-4" />
+          {replies_count > 0 && <span className="text-xs">{replies_count}</span>}
+        </Button>
+        <Button variant="ghost" size="sm" className={`gap-1.5 hover:text-green-500 ${reblogged ? "text-green-500" : "text-muted-foreground"}`}>
+          <Repeat className="h-4 w-4" />
+          {reblogs_count > 0 && <span className="text-xs">{reblogs_count}</span>}
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+          <Quote className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="sm" className={`gap-1.5 hover:text-pink-500 ${favourited ? "text-pink-500 fill-current" : "text-muted-foreground"}`}>
+          <Heart className={`h-4 w-4 ${favourited ? "fill-current" : ""}`} />
+          {favourites_count > 0 && <span className="text-xs">{favourites_count}</span>}
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+          <SmilePlus className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </CardFooter>
     </Card>
   )
 }
