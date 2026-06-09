@@ -46,7 +46,11 @@ const useMasonry = (
             const aspectRatio =
                 image.width && image.height ? image.width / image.height : 1; // Default to square if dimensions not provided
 
-            const displayWidth = columnWidth;
+            let displayWidth = columnWidth;
+            if (images.length === 1 && image.width && image.width < containerWidth) {
+                displayWidth = image.width;
+            }
+            
             let displayHeight = displayWidth / aspectRatio;
             
             if (displayHeight > 600) {
@@ -72,7 +76,11 @@ const useMasonry = (
                     image.width && image.height
                         ? image.width / image.height
                         : 1;
-                const displayWidth = columnWidth;
+                let displayWidth = columnWidth;
+                if (images.length === 1 && image.width && image.width < containerWidth) {
+                    displayWidth = image.width;
+                }
+                
                 let displayHeight = displayWidth / aspectRatio;
                 if (displayHeight > 600) displayHeight = 600;
                 totalImageHeight += displayHeight;
@@ -92,6 +100,10 @@ const useMasonry = (
                         : 1;
                 
                 let displayWidth = columnWidth;
+                if (images.length === 1 && image.width && image.width < containerWidth) {
+                    displayWidth = image.width;
+                }
+                
                 let displayHeight = (displayWidth / aspectRatio) * scaleFactor;
 
                 // Clamp extreme heights for very tall portrait images
@@ -99,8 +111,13 @@ const useMasonry = (
                     displayHeight = 600;
                 }
 
-                const x = colIndex * (columnWidth + config.gap);
+                let x = colIndex * (columnWidth + config.gap);
                 const y = columnY;
+
+                // Center single unstretched images
+                if (images.length === 1 && displayWidth < containerWidth) {
+                    x = (containerWidth - displayWidth) / 2;
+                }
 
                 newLayout.push({
                     ...image,
