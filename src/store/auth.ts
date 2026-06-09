@@ -29,9 +29,10 @@ interface AuthState {
   user: User | null
   clientId: string | null
   clientSecret: string | null
+  instanceUrl: string | null
   setToken: (token: string | null) => void
   setUser: (user: User | null) => void
-  setClientData: (id: string, secret: string) => void
+  setClientData: (id: string | null, secret: string | null, url: string | null) => void
   logout: () => void
 }
 
@@ -42,9 +43,10 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       clientId: null,
       clientSecret: null,
+      instanceUrl: null,
       setToken: (token) => set({ token }),
       setUser: (user) => set({ user }),
-      setClientData: (clientId, clientSecret) => set({ clientId, clientSecret }),
+      setClientData: (clientId, clientSecret, instanceUrl) => set({ clientId, clientSecret, instanceUrl }),
       logout: () => set({ token: null, user: null }),
     }),
     {

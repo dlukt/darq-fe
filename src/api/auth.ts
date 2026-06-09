@@ -1,9 +1,20 @@
-import { apiClient } from "./client"
+import { apiClient, BASE_URL } from "./client"
 import { ENDPOINTS } from "./endpoints"
 import { useAuthStore } from "@/store/auth"
 
 export async function ensureAppRegistered() {
-  let { clientId, clientSecret } = useAuthStore.getState()
+  let { clientId, clientSecret, instanceUrl } = useAuthStore.getState()
+
+  const currentEnvUrl = import.meta.env.VITE_BASE_URL || 'default'
+
+  // If the stored instanceUrl doesn't match the current configured URL, clear the stale credentials.
+  // This automatically happens if a developer switches their backend instance in .env
+  if (instanceUrl !== currentEnvUrl) {
+    useAuthStore.getState().setClientData(null, null, null)
+    useAuthStore.getState().logout()
+    clientId = null
+    clientSecret = null
+  }
 
   if (!clientId || !clientSecret) {
     const appForm = new FormData()
@@ -20,7 +31,7 @@ export async function ensureAppRegistered() {
     clientSecret = appResponse.client_secret
 
     if (clientId && clientSecret) {
-      useAuthStore.getState().setClientData(clientId, clientSecret)
+      useAuthStore.getState().setClientData(clientId, clientSecret, currentEnvUrl)
     } else {
       throw new Error("Failed to register application with backend")
     }
