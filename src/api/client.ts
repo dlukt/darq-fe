@@ -2,9 +2,9 @@ import { useAuthStore } from '../store/auth'
 
 export class ApiError extends Error {
   status: number
-  data: any
+  data: unknown
 
-  constructor(status: number, data: any, message: string) {
+  constructor(status: number, data: unknown, message: string) {
     super(message)
     this.status = status
     this.data = data
@@ -12,14 +12,14 @@ export class ApiError extends Error {
 }
 
 interface RequestOptions extends RequestInit {
-  params?: Record<string, any>
+  params?: Record<string, unknown>
 }
 
 // Ensure you replace this with the actual backend domain or make it configurable.
 // When using Vite proxy, it could be an empty string, letting proxy handle it.
 export const BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_BASE_URL || '')
 
-export async function apiClient<T = any>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+export async function apiClient<T = unknown>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { params, headers, ...customConfig } = options
 
   const token = useAuthStore.getState().token

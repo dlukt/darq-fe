@@ -3,8 +3,8 @@ import { ENDPOINTS } from "./endpoints"
 import { useAuthStore } from "@/store/auth"
 
 export async function ensureAppRegistered() {
-  let { clientId, clientSecret, instanceUrl } = useAuthStore.getState()
-
+  let { clientId, clientSecret } = useAuthStore.getState()
+  const { instanceUrl } = useAuthStore.getState()
   const currentEnvUrl = (import.meta.env.VITE_BASE_URL || 'default').replace(/\/$/, '')
 
   // If the stored instanceUrl doesn't match the current configured URL, clear the stale credentials.
@@ -22,7 +22,7 @@ export async function ensureAppRegistered() {
     appForm.append("redirect_uris", `${window.location.origin}/oauth-callback`)
     appForm.append("scopes", "read write follow push admin")
 
-    const appResponse = await apiClient(ENDPOINTS.registerApp, {
+    const appResponse = await apiClient<{client_id: string, client_secret: string}>(ENDPOINTS.registerApp, {
       method: "POST",
       body: appForm,
     })
@@ -49,7 +49,7 @@ export async function getClientToken() {
   form.append("grant_type", "client_credentials")
   form.append("redirect_uri", `${window.location.origin}/oauth-callback`)
 
-  const response = await apiClient(ENDPOINTS.oauthToken, {
+  const response = await apiClient<{access_token: string}>(ENDPOINTS.oauthToken, {
     method: "POST",
     body: form,
   })

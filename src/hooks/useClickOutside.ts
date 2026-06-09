@@ -23,7 +23,7 @@ export const useClickOutside = <T extends HTMLElement = HTMLElement>({
 }: UseClickOutsideProps<T>): void => {
     useEventListener(
         eventType,
-        (event: any) => {
+        (event: MouseEvent | TouchEvent | FocusEvent) => {
             const target = event.target as Node;
 
             if (!target || !target.isConnected) return;

@@ -30,8 +30,8 @@ export function RegisterPage() {
     queryKey: ["captcha"],
     queryFn: async () => {
       try {
-        return await apiClient(ENDPOINTS.captcha)
-      } catch (err) {
+        return await apiClient<{token?: string, url?: string, answer_data?: string}>(ENDPOINTS.captcha)
+      } catch {
         // If the endpoint 404s or is disabled, we assume no captcha is needed
         return null
       }
@@ -69,7 +69,7 @@ export function RegisterPage() {
         }
       }
 
-      const response = await apiClient(ENDPOINTS.register, {
+      const response = await apiClient<{access_token?: string}>(ENDPOINTS.register, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${clientToken}`,
@@ -91,8 +91,9 @@ export function RegisterPage() {
         setSuccessMessage("Registration successful! Please check your email for verification instructions, or wait for admin approval.")
       }
     },
-    onError: (err: any) => {
-      setError(err?.data?.error || err.message || "An error occurred during registration.")
+    onError: (err: unknown) => {
+      const error = err as { data?: { error?: string }, message?: string }
+      setError(error?.data?.error || error.message || "An error occurred during registration.")
     },
   })
 

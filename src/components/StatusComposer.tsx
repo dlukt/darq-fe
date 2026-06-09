@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -105,6 +106,7 @@ export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSu
     staleTime: 1000 * 60 * 60 * 24,
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const currentContent = watch("content")
   const showCW = watch("showCW")
   const currentVisibility = watch("visibility")

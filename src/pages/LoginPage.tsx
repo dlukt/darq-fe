@@ -32,7 +32,7 @@ export function LoginPage() {
       tokenForm.append("username", username)
       tokenForm.append("password", password)
 
-      const tokenResponse = await apiClient(ENDPOINTS.oauthToken, {
+      const tokenResponse = await apiClient<{access_token: string}>(ENDPOINTS.oauthToken, {
         method: "POST",
         body: tokenForm,
       })
@@ -50,9 +50,10 @@ export function LoginPage() {
     onSuccess: () => {
       navigate("/")
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       setToken(null)
-      setError(err?.data?.error || "Invalid username or password")
+      const error = err as { data?: { error?: string } }
+      setError(error?.data?.error || "Invalid username or password")
     },
   })
 

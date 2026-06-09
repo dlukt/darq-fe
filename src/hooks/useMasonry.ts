@@ -131,6 +131,7 @@ const useMasonry = (
             });
         });
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLayout(newLayout);
         setTotalHeight(maxHeight);
     }, [images, containerWidth, config.gap, config.columns]);
