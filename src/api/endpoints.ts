@@ -23,11 +23,18 @@ export const ENDPOINTS = {
   }
 }
 
-// Example API helper functions
 export async function verifyCredentials() {
   return apiClient(ENDPOINTS.verifyCredentials)
 }
 
-export async function fetchPublicTimeline(params?: Record<string, any>) {
+export async function fetchHomeTimeline(params?: Record<string, any>) {
+  return apiClient(ENDPOINTS.timelines.home, { params })
+}
+
+export async function fetchLocalTimeline(params?: Record<string, any>) {
+  return apiClient(ENDPOINTS.timelines.public, { params: { ...params, local: true } })
+}
+
+export async function fetchFederatedTimeline(params?: Record<string, any>) {
   return apiClient(ENDPOINTS.timelines.public, { params })
 }
