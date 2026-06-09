@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router"
 import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline } from "@/api/endpoints"
 import { StatusCard, type Status } from "@/components/StatusCard"
+import { StatusComposer } from "@/components/StatusComposer"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 
@@ -41,6 +42,8 @@ export function TimelinePage({ type }: TimelinePageProps) {
   return (
     <div className="max-w-2xl mx-auto py-4">
       <h1 className="text-3xl font-bold mb-6 tracking-tight">{title}</h1>
+
+      {user && <StatusComposer />}
 
       {isAuthRequired && (
         <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card">
