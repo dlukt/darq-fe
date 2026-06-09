@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth"
 import { useForm, Controller, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import iso6391 from "iso-639-1"
 
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -12,14 +13,14 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus } from "lucide-react"
-
-const COMMON_EMOJIS = ["😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🥸","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😮‍💨","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","👍","👎","👏","🙌","🫶","❤️","💔","🔥","✨","🌟","💯"]
+import { EMOJI_CATEGORIES } from "@/lib/emojis"
 
 type Visibility = "public" | "unlisted" | "private" | "direct"
 
@@ -49,12 +50,24 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
+const contentTypes = [
+  { value: "text/plain", label: "Plain Text" },
+  { value: "text/html", label: "HTML" },
+  { value: "text/markdown", label: "Markdown" },
+  { value: "text/bbcode", label: "BBCode" },
+  { value: "text/mfm", label: "MFM" }
+]
+
+const languages = iso6391.getAllCodes().map(code => ({
+  value: code,
+  label: iso6391.getNativeName(code) || iso6391.getName(code)
+}))
+
 export function StatusComposer() {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Attachments are kept in local state to handle File objects and progress ticks efficiently
   const [attachments, setAttachments] = useState<Attachment[]>([])
 
   const form = useForm<FormValues>({
@@ -119,7 +132,8 @@ export function StatusComposer() {
       status: values.content,
       visibility: values.visibility,
       content_type: values.contentType,
-      local: values.localOnly
+      local: values.localOnly,
+      language: values.language
     }
     
     if (values.showCW && values.contentWarning.trim()) {
@@ -340,7 +354,11 @@ export function StatusComposer() {
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={v => v && field.onChange(v)}>
                         <SelectTrigger className="w-[120px] h-8 text-xs bg-background">
-                          <SelectValue placeholder="Duration" />
+                          {field.value === "300" ? "5 Minutes" : 
+                           field.value === "1800" ? "30 Minutes" :
+                           field.value === "3600" ? "1 Hour" :
+                           field.value === "86400" ? "1 Day" :
+                           field.value === "604800" ? "1 Week" : "Duration"}
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="300">5 Minutes</SelectItem>
@@ -404,15 +422,19 @@ export function StatusComposer() {
                     control={control}
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={v => v && field.onChange(v)}>
-                        <SelectTrigger className="h-8 w-[70px] text-xs">
-                          <SelectValue />
+                        <SelectTrigger className="h-8 w-[100px] text-xs">
+                          <span className="truncate">
+                            {languages.find(l => l.value === field.value)?.label || "Language"}
+                          </span>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="en">EN</SelectItem>
-                          <SelectItem value="es">ES</SelectItem>
-                          <SelectItem value="fr">FR</SelectItem>
-                          <SelectItem value="de">DE</SelectItem>
-                          <SelectItem value="ja">JA</SelectItem>
+                          <SelectScrollUpButton />
+                          {languages.map(lang => (
+                            <SelectItem key={lang.value} value={lang.value}>
+                              {lang.label}
+                            </SelectItem>
+                          ))}
+                          <SelectScrollDownButton />
                         </SelectContent>
                       </Select>
                     )}
@@ -424,14 +446,14 @@ export function StatusComposer() {
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={v => v && field.onChange(v)}>
                         <SelectTrigger className="h-8 w-[110px] text-xs">
-                          <SelectValue />
+                          {contentTypes.find(c => c.value === field.value)?.label || "Format"}
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="text/plain">Plain Text</SelectItem>
-                          <SelectItem value="text/html">HTML</SelectItem>
-                          <SelectItem value="text/markdown">Markdown</SelectItem>
-                          <SelectItem value="text/bbcode">BBCode</SelectItem>
-                          <SelectItem value="text/mfm">MFM</SelectItem>
+                          {contentTypes.map(c => (
+                            <SelectItem key={c.value} value={c.value}>
+                              {c.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     )}
@@ -468,22 +490,34 @@ export function StatusComposer() {
                       </Button>
                     } />
                     <PopoverContent className="w-[320px] p-2" align="start">
-                      <div className="mb-2 text-xs font-semibold text-muted-foreground px-1">Common Emojis</div>
-                      <ScrollArea className="h-64">
-                        <div className="grid grid-cols-8 gap-1">
-                          {COMMON_EMOJIS.map((emoji, i) => (
-                            <Button 
-                              type="button"
-                              key={i} 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0 text-xl" 
-                              onClick={() => handleEmojiClick(emoji)}
-                            >
-                              {emoji}
-                            </Button>
+                      <Tabs defaultValue={EMOJI_CATEGORIES[0].name}>
+                        <TabsList className="w-full overflow-x-auto justify-start h-auto flex-nowrap pb-1 no-scrollbar">
+                          {EMOJI_CATEGORIES.map(cat => (
+                            <TabsTrigger key={cat.name} value={cat.name} className="text-xs px-2 py-1 shrink-0">
+                              {cat.name}
+                            </TabsTrigger>
                           ))}
-                        </div>
-                      </ScrollArea>
+                        </TabsList>
+                        {EMOJI_CATEGORIES.map(cat => (
+                          <TabsContent key={cat.name} value={cat.name} className="mt-2">
+                            <ScrollArea className="h-48">
+                              <div className="grid grid-cols-8 gap-1">
+                                {cat.emojis.map((emoji, i) => (
+                                  <Button 
+                                    type="button"
+                                    key={i} 
+                                    variant="ghost" 
+                                    className="h-8 w-8 p-0 text-xl" 
+                                    onClick={() => handleEmojiClick(emoji)}
+                                  >
+                                    {emoji}
+                                  </Button>
+                                ))}
+                              </div>
+                            </ScrollArea>
+                          </TabsContent>
+                        ))}
+                      </Tabs>
                     </PopoverContent>
                   </Popover>
 

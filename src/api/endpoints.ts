@@ -48,6 +48,7 @@ export interface PostStatusPayload {
   // Pleroma uses `in_reply_to_id` and custom visibility or boolean.
   // We will pass `local: true` if needed.
   local?: boolean
+  language?: string
 }
 
 export async function postStatus(payload: PostStatusPayload) {
