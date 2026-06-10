@@ -4,7 +4,7 @@ import { fetchInstanceConfig, fetchNodeInfo, fetchTOS, lookupAccount } from '@/a
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { UserPopover } from '@/components/UserPopover'
 
 function StaffMemberCard({ username }: { username: string }) {
   const { data: user, isLoading } = useQuery({
@@ -30,8 +30,8 @@ function StaffMemberCard({ username }: { username: string }) {
   }
 
   return (
-    <Popover>
-      <PopoverTrigger render={<div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full" />}>
+    <UserPopover user={user}>
+      <div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full">
         <Avatar className="h-12 w-12">
           <AvatarImage src={user.avatar} alt={user.display_name || user.username} />
           <AvatarFallback>{(user.display_name || user.username).charAt(0).toUpperCase()}</AvatarFallback>
@@ -40,40 +40,8 @@ function StaffMemberCard({ username }: { username: string }) {
           <span className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
           <span className="text-muted-foreground text-xs">@{user.acct}</span>
         </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 overflow-hidden" side="right" align="start">
-        <div className="h-24 w-full bg-muted">
-          {user.header && <img src={user.header} alt="" className="h-full w-full object-cover" />}
-        </div>
-        <div className="p-4 pt-0 relative">
-          <Avatar className="h-16 w-16 absolute -top-8 border-4 border-background">
-            <AvatarImage src={user.avatar} alt={user.display_name || user.username} />
-            <AvatarFallback>{(user.display_name || user.username).charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="mt-10 flex flex-col">
-            <span className="font-bold" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
-            <span className="text-muted-foreground text-sm">@{user.acct}</span>
-          </div>
-          {user.note && (
-            <div className="mt-4 text-sm break-words prose dark:prose-invert prose-sm line-clamp-4" dangerouslySetInnerHTML={{ __html: user.note }} />
-          )}
-          <div className="mt-4 flex space-x-4 text-sm">
-            <div className="flex flex-col">
-              <span className="font-bold">{user.statuses_count}</span>
-              <span className="text-muted-foreground">Posts</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold">{user.following_count}</span>
-              <span className="text-muted-foreground">Following</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold">{user.followers_count}</span>
-              <span className="text-muted-foreground">Followers</span>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </UserPopover>
   )
 }
 

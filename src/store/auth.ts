@@ -29,6 +29,8 @@ export interface User {
   pleroma?: {
     is_admin?: boolean
     is_moderator?: boolean
+    hide_followers_count?: boolean
+    hide_follows_count?: boolean
   }
 }
 
