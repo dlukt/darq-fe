@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, Settings, Inbox, Moon, Sun, Monitor, Globe, Users, Bookmark, Mail } from "lucide-react"
+import { Home, Settings, Moon, Sun, Monitor, Globe, Users, Bookmark, Mail } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 import { Link, useLocation } from "react-router"
 import { NavUser } from "./nav-user"
@@ -62,12 +62,6 @@ export function AppSidebar() {
                 <SidebarMenuButton isActive={location.pathname === "/direct"} render={<Link to="/direct" />}>
                   <Mail />
                   <span>Direct Messages</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton render={<Link to="/inbox" />}>
-                  <Inbox />
-                  <span>Inbox</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
