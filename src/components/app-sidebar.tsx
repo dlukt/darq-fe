@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, Settings, Moon, Sun, Monitor, Globe, Users, Bookmark, Mail, List as ListIcon, Bell } from "lucide-react"
+import { Home, Settings, Moon, Sun, Monitor, Globe, Users, Bookmark, Mail, List as ListIcon, Bell, Info } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 import { Link, useLocation } from "react-router"
 import { NavUser } from "./nav-user"
@@ -74,6 +74,12 @@ export function AppSidebar() {
                 <SidebarMenuButton isActive={location.pathname === "/notifications"} render={<Link to="/notifications" />}>
                   <Bell />
                   <span>Notifications</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={location.pathname === "/about"} render={<Link to="/about" />}>
+                  <Info />
+                  <span>About</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

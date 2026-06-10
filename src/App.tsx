@@ -7,6 +7,7 @@ import { TimelinePage } from "@/pages/TimelinePage"
 import { StatusPage } from "@/pages/StatusPage"
 import { ListsPage } from "@/pages/ListsPage"
 import NotificationsPage from "@/pages/NotificationsPage"
+import AboutPage from "@/pages/AboutPage"
 
 function App() {
   const { user } = useAuthStore()
@@ -21,6 +22,7 @@ function App() {
         <Route path="/bookmarks" element={<TimelinePage type="bookmarks" />} />
         <Route path="/direct" element={<TimelinePage type="direct" />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/lists" element={<ListsPage />} />
         <Route path="/lists/:id" element={<TimelinePage type="list" />} />
         <Route path="/status/:id" element={<StatusPage />} />

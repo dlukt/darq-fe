@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient, BASE_URL } from './client'
 import type { Status } from '@/components/StatusCard'
 import type { User } from '@/store/auth'
 
@@ -261,6 +261,32 @@ export async function fetchNotifications(types?: string[]) {
     params['include_types'] = types
   }
   return apiClient<Notification[]>('/api/v1/notifications', { params })
+}
+
+export interface NodeInfo {
+  metadata: {
+    uploadLimits: {
+      avatar: number
+      background: number
+      banner: number
+      general: number
+    }
+    staffAccounts: string[]
+  }
+}
+
+export async function fetchNodeInfo() {
+  return apiClient<NodeInfo>('/nodeinfo/2.0.json')
+}
+
+export async function fetchTOS() {
+  const response = await fetch(`${BASE_URL}/static/terms-of-service.html`)
+  if (!response.ok) return null
+  return response.text()
+}
+
+export async function lookupAccount(username: string) {
+  return apiClient<Account>(`/api/v1/accounts/lookup`, { params: { acct: username } })
 }
 
 export async function markNotificationsAsRead() {
