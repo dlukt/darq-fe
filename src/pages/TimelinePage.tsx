@@ -1,17 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
-import { Link } from "react-router"
-import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline } from "@/api/endpoints"
+import { Link, useParams } from "react-router"
+import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline, fetchListTimeline, fetchList } from "@/api/endpoints"
 import { StatusCard, type Status } from "@/components/StatusCard"
 import { StatusComposer } from "@/components/StatusComposer"
+import { ListAccounts } from "@/components/ListAccounts"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 
 interface TimelinePageProps {
-  type: "home" | "local" | "federated" | "bookmarks" | "direct"
+  type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list"
 }
 
 export function TimelinePage({ type }: TimelinePageProps) {
   const { user } = useAuthStore()
+  const { id } = useParams()
 
   // Select the appropriate fetcher
   const queryFn = () => {
@@ -21,6 +23,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
       case "federated": return fetchFederatedTimeline()
       case "bookmarks": return fetchBookmarks()
       case "direct": return fetchDirectTimeline()
+      case "list": return id ? fetchListTimeline(id) : Promise.resolve([])
     }
   }
 
@@ -31,21 +34,33 @@ export function TimelinePage({ type }: TimelinePageProps) {
     federated: "Federated Timeline",
     bookmarks: "Bookmarks",
     direct: "Direct Messages",
+    list: "List Timeline",
   }[type]
 
   // Check if we should even attempt fetching (e.g. Home requires auth)
-  const isAuthRequired = (type === "home" || type === "bookmarks" || type === "direct") && !user
+  const isAuthRequired = (type === "home" || type === "bookmarks" || type === "direct" || type === "list") && !user
 
   const { data: statuses, isLoading, isError, error } = useQuery({
-    queryKey: ["timeline", type],
+    queryKey: ["timeline", type, id],
     queryFn,
     retry: false,
     enabled: !isAuthRequired, // Don't fetch if it requires auth but we aren't logged in
   })
 
+  const { data: listData } = useQuery({
+    queryKey: ["list", id],
+    queryFn: () => fetchList(id!),
+    enabled: type === "list" && !!id,
+  })
+
+  const displayTitle = type === "list" && listData ? listData.title : title
+
   return (
-    <div className="max-w-2xl mx-auto py-4">
-      <h1 className="text-3xl font-bold mb-6 tracking-tight">{title}</h1>
+    <div className="max-w-2xl mx-auto py-4 px-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">{displayTitle}</h1>
+        {type === "list" && id && <ListAccounts listId={id} />}
+      </div>
 
       {user && <StatusComposer />}
 

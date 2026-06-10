@@ -5,6 +5,7 @@ import { LoginPage } from "@/pages/LoginPage"
 import { RegisterPage } from "@/pages/RegisterPage"
 import { TimelinePage } from "@/pages/TimelinePage"
 import { StatusPage } from "@/pages/StatusPage"
+import { ListsPage } from "@/pages/ListsPage"
 
 function App() {
   const { user } = useAuthStore()
@@ -18,6 +19,8 @@ function App() {
         <Route path="/federated" element={<TimelinePage type="federated" />} />
         <Route path="/bookmarks" element={<TimelinePage type="bookmarks" />} />
         <Route path="/direct" element={<TimelinePage type="direct" />} />
+        <Route path="/lists" element={<ListsPage />} />
+        <Route path="/lists/:id" element={<TimelinePage type="list" />} />
         <Route path="/status/:id" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

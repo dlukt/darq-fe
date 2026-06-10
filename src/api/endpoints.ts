@@ -42,6 +42,12 @@ export const ENDPOINTS = {
     statuses: (id: string) => `/api/v1/accounts/${id}/statuses`,
   },
   bookmarks: '/api/v1/bookmarks',
+  lists: {
+    base: '/api/v1/lists',
+    single: (id: string) => `/api/v1/lists/${id}`,
+    accounts: (id: string) => `/api/v1/lists/${id}/accounts`,
+    timeline: (id: string) => `/api/v1/timelines/list/${id}`,
+  },
 }
 
 export async function verifyCredentials() {
@@ -176,4 +182,58 @@ export interface StatusContext {
 
 export async function fetchStatusContext(id: string) {
   return apiClient<StatusContext>(ENDPOINTS.statuses.context(id))
+}
+
+// Lists
+export interface List {
+  id: string
+  title: string
+  replies_policy: string
+}
+
+export async function fetchLists() {
+  return apiClient<List[]>(ENDPOINTS.lists.base)
+}
+
+export async function fetchList(id: string) {
+  return apiClient<List>(ENDPOINTS.lists.single(id))
+}
+
+export async function createList(title: string) {
+  return apiClient<List>(ENDPOINTS.lists.base, {
+    method: 'POST',
+    body: JSON.stringify({ title })
+  })
+}
+
+export async function deleteList(id: string) {
+  return apiClient(ENDPOINTS.lists.single(id), {
+    method: 'DELETE'
+  })
+}
+
+export async function fetchListTimeline(id: string, params?: Record<string, string | number | boolean>) {
+  return apiClient<Status[]>(ENDPOINTS.lists.timeline(id), { params })
+}
+
+export async function fetchListAccounts(id: string) {
+  return apiClient<User[]>(ENDPOINTS.lists.accounts(id))
+}
+
+export async function searchAccounts(query: string) {
+  return apiClient<User[]>('/api/v1/accounts/search', { params: { q: query, resolve: true } })
+}
+
+export async function addAccountsToList(id: string, accountIds: string[]) {
+  return apiClient(ENDPOINTS.lists.accounts(id), {
+    method: 'POST',
+    body: JSON.stringify({ account_ids: accountIds })
+  })
+}
+
+export async function removeAccountsFromList(id: string, accountIds: string[]) {
+  return apiClient(ENDPOINTS.lists.accounts(id), {
+    method: 'DELETE',
+    body: JSON.stringify({ account_ids: accountIds })
+  })
 }
