@@ -258,7 +258,7 @@ export interface Notification {
 export async function fetchNotifications(types?: string[]) {
   const params: Record<string, string | string[]> = {}
   if (types && types.length > 0) {
-    params['include_types[]'] = types
+    params['include_types'] = types
   }
   return apiClient<Notification[]>('/api/v1/notifications', { params })
 }
