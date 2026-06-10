@@ -184,11 +184,11 @@ export async function fetchStatusContext(id: string) {
   return apiClient<StatusContext>(ENDPOINTS.statuses.context(id))
 }
 
-// Lists
 export interface List {
   id: string
   title: string
   replies_policy: string
+  exclusive?: boolean
 }
 
 export async function fetchLists() {
@@ -199,10 +199,14 @@ export async function fetchList(id: string) {
   return apiClient<List>(ENDPOINTS.lists.single(id))
 }
 
-export async function createList(title: string) {
+export async function createList(title: string, exclusive?: boolean) {
+  const body: Record<string, string | boolean> = { title }
+  if (exclusive !== undefined) {
+    body.exclusive = exclusive
+  }
   return apiClient<List>(ENDPOINTS.lists.base, {
     method: 'POST',
-    body: JSON.stringify({ title })
+    body: JSON.stringify(body)
   })
 }
 
@@ -220,8 +224,12 @@ export async function fetchListAccounts(id: string) {
   return apiClient<User[]>(ENDPOINTS.lists.accounts(id))
 }
 
-export async function searchAccounts(query: string) {
-  return apiClient<User[]>('/api/v1/accounts/search', { params: { q: query, resolve: true } })
+export async function searchAccounts(query: string, followingOnly?: boolean) {
+  const params: Record<string, string | boolean> = { q: query, resolve: true }
+  if (followingOnly) {
+    params.following = true
+  }
+  return apiClient<User[]>('/api/v1/accounts/search', { params })
 }
 
 export async function addAccountsToList(id: string, accountIds: string[]) {

@@ -4,11 +4,13 @@ import { Link } from "react-router"
 import { fetchLists, createList, deleteList, type List } from "@/api/endpoints"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Trash, Loader2 } from "lucide-react"
 
 export function ListsPage() {
   const queryClient = useQueryClient()
   const [newListName, setNewListName] = useState("")
+  const [exclusive, setExclusive] = useState(false)
 
   const { data: lists, isLoading, isError } = useQuery({
     queryKey: ["lists"],
@@ -16,10 +18,11 @@ export function ListsPage() {
   })
 
   const createMutation = useMutation({
-    mutationFn: (title: string) => createList(title),
+    mutationFn: ({ title, exclusive }: { title: string, exclusive: boolean }) => createList(title, exclusive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lists"] })
       setNewListName("")
+      setExclusive(false)
     },
   })
 
@@ -33,7 +36,7 @@ export function ListsPage() {
   const handleCreateList = (e: React.FormEvent) => {
     e.preventDefault()
     if (newListName.trim()) {
-      createMutation.mutate(newListName.trim())
+      createMutation.mutate({ title: newListName.trim(), exclusive })
     }
   }
 
@@ -41,18 +44,27 @@ export function ListsPage() {
     <div className="max-w-2xl mx-auto py-4 px-4">
       <h1 className="text-3xl font-bold mb-6 tracking-tight">Your Lists</h1>
 
-      <form onSubmit={handleCreateList} className="flex gap-2 mb-8">
-        <Input
-          placeholder="New list name..."
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-          disabled={createMutation.isPending}
-          className="max-w-xs"
-        />
-        <Button type="submit" disabled={!newListName.trim() || createMutation.isPending}>
-          {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create
-        </Button>
+      <form onSubmit={handleCreateList} className="flex flex-col gap-3 mb-8 bg-card p-4 rounded-lg border">
+        <h2 className="text-lg font-semibold">Create New List</h2>
+        <div className="flex gap-2">
+          <Input
+            placeholder="New list name..."
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+            disabled={createMutation.isPending}
+            className="max-w-xs"
+          />
+          <Button type="submit" disabled={!newListName.trim() || createMutation.isPending}>
+            {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Create
+          </Button>
+        </div>
+        <div className="flex items-center space-x-2 mt-1">
+          <Checkbox id="exclusive" checked={exclusive} onCheckedChange={(c) => setExclusive(c === true)} disabled={createMutation.isPending} />
+          <label htmlFor="exclusive" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+            Remove users on list from home timeline
+          </label>
+        </div>
       </form>
 
       {isLoading && (

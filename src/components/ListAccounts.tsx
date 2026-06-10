@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { fetchListAccounts, searchAccounts, addAccountsToList, removeAccountsFromList } from "@/api/endpoints"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { UserPlus, UserMinus, Settings, Loader2 } from "lucide-react"
 
@@ -13,6 +14,7 @@ interface ListAccountsProps {
 export function ListAccounts({ listId }: ListAccountsProps) {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
+  const [followingOnly, setFollowingOnly] = useState(false)
 
   const { data: accounts, isLoading: accountsLoading } = useQuery({
     queryKey: ["listAccounts", listId],
@@ -20,8 +22,8 @@ export function ListAccounts({ listId }: ListAccountsProps) {
   })
 
   const { data: searchResults, isLoading: searchLoading } = useQuery({
-    queryKey: ["searchAccounts", searchQuery],
-    queryFn: () => searchAccounts(searchQuery),
+    queryKey: ["searchAccounts", searchQuery, followingOnly],
+    queryFn: () => searchAccounts(searchQuery, followingOnly),
     enabled: searchQuery.length > 2,
   })
 
@@ -63,6 +65,12 @@ export function ListAccounts({ listId }: ListAccountsProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            <div className="flex items-center space-x-2">
+              <Checkbox id="following-only" checked={followingOnly} onCheckedChange={(c) => setFollowingOnly(c === true)} />
+              <label htmlFor="following-only" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-muted-foreground">
+                Limit to Following
+              </label>
+            </div>
             {searchLoading && <div className="text-center text-sm text-muted-foreground">Searching...</div>}
             {searchResults && searchResults.length > 0 && (
               <div className="space-y-2 border rounded-md p-2 max-h-48 overflow-y-auto">
