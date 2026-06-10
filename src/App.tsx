@@ -29,7 +29,7 @@ function App() {
         <Route path="/status/:id" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/@:username" element={<ProfilePage />} />
+        <Route path="/:handle" element={<ProfilePage />} />
       </Route>
     </Routes>
   )

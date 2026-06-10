@@ -81,8 +81,12 @@ function ProfileFollowList({ userId, type }: { userId: string, type: 'following'
 }
 
 export function ProfilePage() {
-  const { username } = useParams()
+  const { handle } = useParams()
   const authUser = useAuthStore(state => state.user)
+
+  // React Router v7 doesn't support partial dynamic segments like `/@:username`, 
+  // so we use `/:handle` and strip the leading `@` here if it exists.
+  const username = handle?.startsWith('@') ? handle.slice(1) : handle
 
   // First, lookup the account by username/acct to get the ID
   const { data: accountLookup, isLoading: isLookupLoading } = useQuery({
