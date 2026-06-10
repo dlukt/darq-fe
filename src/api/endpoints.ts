@@ -27,6 +27,8 @@ export const ENDPOINTS = {
     unfavourite: (id: string) => `/api/v1/statuses/${id}/unfavourite`,
     bookmark: (id: string) => `/api/v1/statuses/${id}/bookmark`,
     unbookmark: (id: string) => `/api/v1/bookmarks/${id}`,
+    mute: (id: string) => `/api/v1/statuses/${id}/mute`,
+    unmute: (id: string) => `/api/v1/statuses/${id}/unmute`,
   },
   reactions: {
     add: (id: string, emoji: string) => `/api/v1/pleroma/statuses/${id}/reactions/${emoji}`,
@@ -60,9 +62,6 @@ export interface PostStatusPayload {
     expires_in: number
     multiple: boolean
   }
-  // Local only is often implemented as a custom parameter in Akkoma/Pleroma.
-  // Pleroma uses `in_reply_to_id` and custom visibility or boolean.
-  // We will pass `local: true` if needed.
   local?: boolean
   language?: string
   in_reply_to_id?: string
@@ -70,7 +69,6 @@ export interface PostStatusPayload {
 }
 
 export async function postStatus(payload: PostStatusPayload) {
-  // Strip out any empty strings from payload to avoid API validation errors
   const cleanPayload = Object.fromEntries(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(payload).filter(([_, v]) => v !== "" && v !== undefined && v !== null)
@@ -97,6 +95,18 @@ export async function toggleFavouriteStatus(id: string, isFavourited: boolean) {
 export async function toggleBookmarkStatus(id: string, isBookmarked: boolean) {
   return apiClient(isBookmarked ? ENDPOINTS.statuses.unbookmark(id) : ENDPOINTS.statuses.bookmark(id), {
     method: 'POST'
+  })
+}
+
+export async function toggleMuteConversation(id: string, isMuted: boolean) {
+  return apiClient(isMuted ? ENDPOINTS.statuses.unmute(id) : ENDPOINTS.statuses.mute(id), {
+    method: 'POST'
+  })
+}
+
+export async function deleteStatus(id: string) {
+  return apiClient(ENDPOINTS.statuses.single(id), {
+    method: 'DELETE'
   })
 }
 

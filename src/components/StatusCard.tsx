@@ -12,6 +12,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ImageGallery, type ImageItem } from "@/components/ui/image-gallery"
 import { StatusComposer } from "@/components/StatusComposer"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useAuthStore } from "@/store/auth"
+import { deleteStatus, toggleMuteConversation } from "@/api/endpoints"
 
 import { 
   MessageCircle, 
@@ -86,6 +89,9 @@ export interface Status {
   favourited?: boolean
   reblogged?: boolean
   bookmarked?: boolean
+  muted?: boolean
+  url?: string
+  uri?: string
   account: {
     id: string
     username: string
@@ -118,9 +124,13 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
     favourited = false,
     reblogged = false,
     bookmarked = false,
+    muted = false,
+    url,
+    uri,
   } = status
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { user } = useAuthStore()
 
   // Very basic fallback if no display name
   const displayName = account.display_name || account.username
@@ -164,6 +174,20 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
   const reactionMutation = useMutation({
     mutationFn: ({ emoji, isReacted }: { emoji: string; isReacted: boolean }) => 
       toggleReaction(status.id, emoji, isReacted),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    },
+  })
+
+  const muteMutation = useMutation({
+    mutationFn: () => toggleMuteConversation(status.id, muted),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteStatus(status.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
     },
@@ -230,6 +254,48 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
           <span className="text-sm text-muted-foreground">
             @{account.acct} &middot; {dateStr}
           </span>
+        </div>
+
+        <div className="ml-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent h-8 w-8 text-muted-foreground hover:text-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => muteMutation.mutate()}>
+                {muted ? "Unmute conversation" : "Mute conversation"}
+              </DropdownMenuItem>
+              {(url || uri) && (
+                <DropdownMenuItem onClick={() => {
+                  const link = url || uri
+                  if (link) {
+                    navigator.clipboard.writeText(link)
+                  }
+                }}>
+                  Copy link to post
+                </DropdownMenuItem>
+              )}
+              {(url || uri) && (
+                <DropdownMenuItem onClick={() => window.open(url || uri, '_blank', 'noopener,noreferrer')}>
+                  External source
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              {user?.id === account.id && (
+                <DropdownMenuItem 
+                  className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                  onClick={() => deleteMutation.mutate()}
+                >
+                  Delete post
+                </DropdownMenuItem>
+              )}
+              {user?.id !== account.id && (
+                <DropdownMenuItem onClick={() => console.log('Report post clicked')}>
+                  Report
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent className="pb-2">
