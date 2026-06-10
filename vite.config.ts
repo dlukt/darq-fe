@@ -32,6 +32,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        "/static": {
+          target,
+          changeOrigin: true,
+          secure: false,
+        },
         "/socket": {
           target,
           ws: true,
