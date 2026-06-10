@@ -256,47 +256,6 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
           </span>
         </div>
 
-        <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent h-8 w-8 text-muted-foreground hover:text-foreground">
-              <MoreHorizontal className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => muteMutation.mutate()}>
-                {muted ? "Unmute conversation" : "Mute conversation"}
-              </DropdownMenuItem>
-              {(url || uri) && (
-                <DropdownMenuItem onClick={() => {
-                  const link = url || uri
-                  if (link) {
-                    navigator.clipboard.writeText(link)
-                  }
-                }}>
-                  Copy link to post
-                </DropdownMenuItem>
-              )}
-              {(url || uri) && (
-                <DropdownMenuItem onClick={() => window.open(url || uri, '_blank', 'noopener,noreferrer')}>
-                  External source
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              {user?.id === account.id && (
-                <DropdownMenuItem 
-                  className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-                  onClick={() => deleteMutation.mutate()}
-                >
-                  Delete post
-                </DropdownMenuItem>
-              )}
-              {user?.id !== account.id && (
-                <DropdownMenuItem onClick={() => console.log('Report post clicked')}>
-                  Report
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </CardHeader>
       <CardContent className="pb-2">
         {spoiler_text && (
@@ -595,9 +554,45 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
           <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
         </Button>
 
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent h-8 w-8 text-muted-foreground hover:text-foreground">
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => muteMutation.mutate()}>
+              {muted ? "Unmute conversation" : "Mute conversation"}
+            </DropdownMenuItem>
+            {(url || uri) && (
+              <DropdownMenuItem onClick={() => {
+                const link = url || uri
+                if (link) {
+                  navigator.clipboard.writeText(link)
+                }
+              }}>
+                Copy link to post
+              </DropdownMenuItem>
+            )}
+            {(url || uri) && (
+              <DropdownMenuItem onClick={() => window.open(url || uri, '_blank', 'noopener,noreferrer')}>
+                External source
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            {user?.id === account.id && (
+              <DropdownMenuItem 
+                className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                onClick={() => deleteMutation.mutate()}
+              >
+                Delete post
+              </DropdownMenuItem>
+            )}
+            {user?.id !== account.id && (
+              <DropdownMenuItem onClick={() => console.log('Report post clicked')}>
+                Report
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
     
