@@ -47,12 +47,6 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton isActive={location.pathname === "/notifications"} render={<Link to="/notifications" />}>
-                  <Bell />
-                  <span>Notifications</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <SidebarMenuButton isActive={location.pathname === "/federated"} render={<Link to="/federated" />}>
                   <Globe />
                   <span>Federated</span>
@@ -74,6 +68,12 @@ export function AppSidebar() {
                 <SidebarMenuButton isActive={location.pathname.startsWith("/lists")} render={<Link to="/lists" />}>
                   <ListIcon />
                   <span>Lists</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={location.pathname === "/notifications"} render={<Link to="/notifications" />}>
+                  <Bell />
+                  <span>Notifications</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
