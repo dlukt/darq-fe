@@ -314,3 +314,23 @@ export async function fetchUserFollowers(id: string, params?: Record<string, str
 export async function fetchFavorites(params?: Record<string, string | number | boolean>) {
   return apiClient<Status[]>(`/api/v1/favourites`, { params })
 }
+
+export async function followUser(id: string) {
+  return apiClient.post(`/api/v1/accounts/${id}/follow`)
+}
+
+export async function unfollowUser(id: string) {
+  return apiClient.post(`/api/v1/accounts/${id}/unfollow`)
+}
+
+export async function fetchFollowedTags() {
+  return apiClient<Array<{ name: string; url: string }>>(`/api/v1/followed_tags`)
+}
+
+export async function followTag(name: string) {
+  return apiClient.post(`/api/v1/tags/${name}/follow`)
+}
+
+export async function unfollowTag(name: string) {
+  return apiClient.post(`/api/v1/tags/${name}/unfollow`)
+}

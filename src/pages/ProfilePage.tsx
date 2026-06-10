@@ -12,9 +12,12 @@ import {
 } from '@/api/endpoints'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { StatusCard } from '@/components/StatusCard'
 import { UserPopover } from '@/components/UserPopover'
 import { Skeleton } from '@/components/ui/skeleton'
+import { followUser, unfollowUser, fetchFollowedTags, followTag, unfollowTag } from '@/api/endpoints'
 
 function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 'replies' | 'media' | 'favorites' }) {
   const { data: statuses, isLoading, isError } = useQuery({
@@ -43,7 +46,7 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
   )
 }
 
-function ProfileFollowList({ userId, type }: { userId: string, type: 'following' | 'followers' }) {
+function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'following' | 'followers', isUs: boolean }) {
   const { data: users, isLoading, isError, error } = useQuery({
     queryKey: ['userFollowList', userId, type],
     queryFn: () => type === 'following' ? fetchUserFollowing(userId) : fetchUserFollowers(userId),
@@ -52,7 +55,6 @@ function ProfileFollowList({ userId, type }: { userId: string, type: 'following'
 
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading users...</div>
   if (isError) {
-    // If the error is a 403 Forbidden, it means the list is hidden
     if (error instanceof Error && error.message.includes('403')) {
       return <div className="p-8 text-center text-muted-foreground">This list is hidden by the user.</div>
     }
@@ -64,7 +66,7 @@ function ProfileFollowList({ userId, type }: { userId: string, type: 'following'
     <div className="flex flex-col gap-4 mt-4">
       {users.map(u => (
         <UserPopover key={u.id} user={u}>
-          <div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full">
+          <div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full relative">
             <Avatar className="h-12 w-12">
               <AvatarImage src={u.avatar} alt={u.display_name || u.username} />
               <AvatarFallback>{(u.display_name || u.username).charAt(0).toUpperCase()}</AvatarFallback>
@@ -73,9 +75,114 @@ function ProfileFollowList({ userId, type }: { userId: string, type: 'following'
               <span className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: u.display_name || u.username }} />
               <span className="text-muted-foreground text-xs">@{u.acct}</span>
             </div>
+            
+            {isUs && type === 'following' && (
+              <div 
+                className="ml-auto" 
+                onClick={(e) => e.stopPropagation()} // Prevent opening popover when clicking switch
+              >
+                <FollowUserToggle userId={u.id} initialFollowing={true} />
+              </div>
+            )}
           </div>
         </UserPopover>
       ))}
+    </div>
+  )
+}
+
+function FollowUserToggle({ userId, initialFollowing }: { userId: string, initialFollowing: boolean }) {
+  const [isFollowing, setIsFollowing] = React.useState(initialFollowing)
+  const [isPending, setIsPending] = React.useState(false)
+
+  const handleToggle = async (checked: boolean) => {
+    setIsPending(true)
+    try {
+      if (checked) {
+        await followUser(userId)
+      } else {
+        await unfollowUser(userId)
+      }
+      setIsFollowing(checked)
+    } catch (error) {
+      console.error("Failed to toggle follow status", error)
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  return (
+    <div className="flex items-center space-x-2">
+      <Label htmlFor={`follow-${userId}`} className="text-xs text-muted-foreground cursor-pointer">
+        {isFollowing ? 'Following' : 'Follow'}
+      </Label>
+      <Switch 
+        id={`follow-${userId}`}
+        checked={isFollowing} 
+        onCheckedChange={handleToggle}
+        disabled={isPending}
+      />
+    </div>
+  )
+}
+
+function ProfileTagList() {
+  const { data: tags, isLoading, isError } = useQuery({
+    queryKey: ['followedTags'],
+    queryFn: fetchFollowedTags,
+    retry: false
+  })
+
+  if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading hashtags...</div>
+  if (isError) return <div className="p-8 text-center text-red-500">Failed to load hashtags.</div>
+  if (!tags || tags.length === 0) return <div className="p-8 text-center text-muted-foreground">No followed hashtags.</div>
+
+  return (
+    <div className="flex flex-col gap-4 mt-4">
+      {tags.map(tag => (
+        <div key={tag.name} className="flex items-center justify-between p-4 border rounded-lg bg-card">
+          <div className="flex items-center space-x-3">
+            <span className="text-xl text-primary font-bold">#</span>
+            <span className="font-semibold">{tag.name}</span>
+          </div>
+          <FollowTagToggle tagName={tag.name} initialFollowing={true} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function FollowTagToggle({ tagName, initialFollowing }: { tagName: string, initialFollowing: boolean }) {
+  const [isFollowing, setIsFollowing] = React.useState(initialFollowing)
+  const [isPending, setIsPending] = React.useState(false)
+
+  const handleToggle = async (checked: boolean) => {
+    setIsPending(true)
+    try {
+      if (checked) {
+        await followTag(tagName)
+      } else {
+        await unfollowTag(tagName)
+      }
+      setIsFollowing(checked)
+    } catch (error) {
+      console.error("Failed to toggle follow tag status", error)
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  return (
+    <div className="flex items-center space-x-2">
+      <Label htmlFor={`tag-${tagName}`} className="text-xs text-muted-foreground cursor-pointer">
+        {isFollowing ? 'Following' : 'Follow'}
+      </Label>
+      <Switch 
+        id={`tag-${tagName}`}
+        checked={isFollowing} 
+        onCheckedChange={handleToggle}
+        disabled={isPending}
+      />
     </div>
   )
 }
@@ -216,13 +323,28 @@ export function ProfilePage() {
           
           {(!user.pleroma?.hide_follows_count || isUs) && (
             <TabsContent value="following">
-              <ProfileFollowList userId={user.id} type="following" />
+              {isUs ? (
+                <Tabs defaultValue="users" className="w-full mt-2">
+                  <TabsList className="w-full justify-start">
+                    <TabsTrigger value="users">Users</TabsTrigger>
+                    <TabsTrigger value="hashtags">Hashtags</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="users">
+                    <ProfileFollowList userId={user.id} type="following" isUs={isUs} />
+                  </TabsContent>
+                  <TabsContent value="hashtags">
+                    <ProfileTagList />
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <ProfileFollowList userId={user.id} type="following" isUs={isUs} />
+              )}
             </TabsContent>
           )}
           
           {(!user.pleroma?.hide_followers_count || isUs) && (
             <TabsContent value="followers">
-              <ProfileFollowList userId={user.id} type="followers" />
+              <ProfileFollowList userId={user.id} type="followers" isUs={isUs} />
             </TabsContent>
           )}
 
