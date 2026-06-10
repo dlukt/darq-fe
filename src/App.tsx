@@ -17,6 +17,7 @@ function App() {
         <Route path="/local" element={<TimelinePage type="local" />} />
         <Route path="/federated" element={<TimelinePage type="federated" />} />
         <Route path="/bookmarks" element={<TimelinePage type="bookmarks" />} />
+        <Route path="/direct" element={<TimelinePage type="direct" />} />
         <Route path="/status/:id" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

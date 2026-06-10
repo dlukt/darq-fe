@@ -143,6 +143,21 @@ export async function fetchBookmarks(params?: Record<string, string | number | b
   return apiClient<Status[]>(ENDPOINTS.bookmarks, { params })
 }
 
+export interface Conversation {
+  id: string
+  unread: boolean
+  last_status?: Status | null
+}
+
+export async function fetchDirectTimeline(params?: Record<string, string | number | boolean>) {
+  return apiClient<Conversation[]>('/api/v1/conversations', { params })
+    .then(conversations => 
+      conversations
+        .map(c => c.last_status)
+        .filter((s): s is Status => s !== null && s !== undefined)
+    )
+}
+
 export async function voteOnPoll(pollId: string, choices: number[]) {
   return apiClient(ENDPOINTS.polls.vote(pollId), {
     method: 'POST',

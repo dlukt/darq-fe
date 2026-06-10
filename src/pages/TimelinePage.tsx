@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router"
-import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks } from "@/api/endpoints"
+import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline } from "@/api/endpoints"
 import { StatusCard, type Status } from "@/components/StatusCard"
 import { StatusComposer } from "@/components/StatusComposer"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 
 interface TimelinePageProps {
-  type: "home" | "local" | "federated" | "bookmarks"
+  type: "home" | "local" | "federated" | "bookmarks" | "direct"
 }
 
 export function TimelinePage({ type }: TimelinePageProps) {
@@ -20,6 +20,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
       case "local": return fetchLocalTimeline()
       case "federated": return fetchFederatedTimeline()
       case "bookmarks": return fetchBookmarks()
+      case "direct": return fetchDirectTimeline()
     }
   }
 
@@ -29,10 +30,11 @@ export function TimelinePage({ type }: TimelinePageProps) {
     local: "Local Timeline",
     federated: "Federated Timeline",
     bookmarks: "Bookmarks",
+    direct: "Direct Messages",
   }[type]
 
   // Check if we should even attempt fetching (e.g. Home requires auth)
-  const isAuthRequired = (type === "home" || type === "bookmarks") && !user
+  const isAuthRequired = (type === "home" || type === "bookmarks" || type === "direct") && !user
 
   const { data: statuses, isLoading, isError, error } = useQuery({
     queryKey: ["timeline", type],
