@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, Settings, Inbox, Moon, Sun, Monitor, Globe, Users } from "lucide-react"
+import { Home, Settings, Inbox, Moon, Sun, Monitor, Globe, Users, Bookmark } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 import { Link, useLocation } from "react-router"
 import { NavUser } from "./nav-user"
@@ -50,6 +50,12 @@ export function AppSidebar() {
                 <SidebarMenuButton isActive={location.pathname === "/federated"} render={<Link to="/federated" />}>
                   <Globe />
                   <span>Federated</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={location.pathname === "/bookmarks"} render={<Link to="/bookmarks" />}>
+                  <Bookmark />
+                  <span>Bookmarks</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

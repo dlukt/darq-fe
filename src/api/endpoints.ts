@@ -26,7 +26,7 @@ export const ENDPOINTS = {
     favourite: (id: string) => `/api/v1/statuses/${id}/favourite`,
     unfavourite: (id: string) => `/api/v1/statuses/${id}/unfavourite`,
     bookmark: (id: string) => `/api/v1/statuses/${id}/bookmark`,
-    unbookmark: (id: string) => `/api/v1/bookmarks/${id}`,
+    unbookmark: (id: string) => `/api/v1/statuses/${id}/unbookmark`,
     mute: (id: string) => `/api/v1/statuses/${id}/mute`,
     unmute: (id: string) => `/api/v1/statuses/${id}/unmute`,
   },
@@ -40,7 +40,8 @@ export const ENDPOINTS = {
   accounts: {
     detail: (id: string) => `/api/v1/accounts/${id}`,
     statuses: (id: string) => `/api/v1/accounts/${id}/statuses`,
-  }
+  },
+  bookmarks: '/api/v1/bookmarks',
 }
 
 export async function verifyCredentials() {
@@ -136,6 +137,10 @@ export async function fetchLocalTimeline(params?: Record<string, string | number
 
 export async function fetchFederatedTimeline(params?: Record<string, string | number | boolean>) {
   return apiClient<Status[]>(ENDPOINTS.timelines.public, { params })
+}
+
+export async function fetchBookmarks(params?: Record<string, string | number | boolean>) {
+  return apiClient<Status[]>(ENDPOINTS.bookmarks, { params })
 }
 
 export async function voteOnPoll(pollId: string, choices: number[]) {
