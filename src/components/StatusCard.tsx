@@ -132,8 +132,14 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
   const navigate = useNavigate()
   const { user } = useAuthStore()
 
-  // Very basic fallback if no display name
   const displayName = account.display_name || account.username
+
+  // Check if current user can delete
+  const canDelete = user?.id === account.id || 
+                    user?.pleroma?.is_admin || 
+                    user?.pleroma?.is_moderator || 
+                    user?.role?.name?.toLowerCase() === 'admin' || 
+                    user?.role?.name?.toLowerCase() === 'moderator'
 
   // Format date
   const dateStr = new Date(created_at).toLocaleString()
@@ -578,7 +584,7 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            {user?.id === account.id && (
+            {canDelete && (
               <DropdownMenuItem 
                 className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
                 onClick={() => deleteMutation.mutate()}
@@ -586,7 +592,7 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
                 Delete post
               </DropdownMenuItem>
             )}
-            {user?.id !== account.id && (
+            {!canDelete && (
               <DropdownMenuItem onClick={() => console.log('Report post clicked')}>
                 Report
               </DropdownMenuItem>

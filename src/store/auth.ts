@@ -22,6 +22,14 @@ export interface User {
     language: string
     note: string
   }
+  role?: {
+    name: string
+    permissions: string
+  }
+  pleroma?: {
+    is_admin?: boolean
+    is_moderator?: boolean
+  }
 }
 
 interface AuthState {
