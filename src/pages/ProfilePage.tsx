@@ -6,9 +6,15 @@ import {
   lookupAccount, 
   fetchAccount, 
   fetchUserStatuses, 
+  fetchUserPinnedStatuses,
   fetchUserFollowing, 
   fetchUserFollowers, 
-  fetchFavorites 
+  fetchFavorites,
+  followUser,
+  unfollowUser,
+  fetchFollowedTags,
+  followTag,
+  unfollowTag
 } from '@/api/endpoints'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -17,9 +23,15 @@ import { Label } from '@/components/ui/label'
 import { StatusCard } from '@/components/StatusCard'
 import { UserPopover } from '@/components/UserPopover'
 import { Skeleton } from '@/components/ui/skeleton'
-import { followUser, unfollowUser, fetchFollowedTags, followTag, unfollowTag } from '@/api/endpoints'
 
 function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 'replies' | 'media' | 'favorites' }) {
+  const { data: pinnedStatuses, isLoading: isPinnedLoading } = useQuery({
+    queryKey: ['userPinnedTimeline', userId],
+    queryFn: () => fetchUserPinnedStatuses(userId),
+    enabled: type === 'posts',
+    retry: false
+  })
+
   const { data: statuses, isLoading, isError } = useQuery({
     queryKey: ['userTimeline', userId, type],
     queryFn: () => {
@@ -33,13 +45,30 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
     }
   })
 
-  if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading statuses...</div>
+  if (isLoading || (type === 'posts' && isPinnedLoading)) return <div className="p-8 text-center text-muted-foreground">Loading statuses...</div>
   if (isError) return <div className="p-8 text-center text-red-500">Failed to load statuses.</div>
-  if (!statuses || statuses.length === 0) return <div className="p-8 text-center text-muted-foreground">No statuses found.</div>
+  if ((!statuses || statuses.length === 0) && (!pinnedStatuses || pinnedStatuses.length === 0)) {
+    return <div className="p-8 text-center text-muted-foreground">No statuses found.</div>
+  }
+
+  // Filter out pinned statuses from the main feed so they don't duplicate
+  const pinnedIds = new Set(pinnedStatuses?.map(s => s.id) || [])
+  const filteredStatuses = statuses?.filter(s => !pinnedIds.has(s.id)) || []
 
   return (
     <div className="flex flex-col gap-2 mt-4">
-      {statuses.map(status => (
+      {pinnedStatuses?.map(status => (
+        <div key={`pinned-${status.id}`} className="relative">
+          <div className="absolute top-2 right-4 z-10 flex items-center text-muted-foreground bg-background/80 px-2 py-0.5 rounded text-xs font-semibold">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            </svg>
+            Pinned
+          </div>
+          <StatusCard status={status} />
+        </div>
+      ))}
+      {filteredStatuses.map(status => (
         <StatusCard key={status.id} status={status} />
       ))}
     </div>

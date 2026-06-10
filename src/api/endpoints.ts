@@ -303,6 +303,10 @@ export async function fetchUserStatuses(id: string, params?: Record<string, stri
   return apiClient<Status[]>(`/api/v1/accounts/${id}/statuses`, { params })
 }
 
+export async function fetchUserPinnedStatuses(id: string) {
+  return apiClient<Status[]>(`/api/v1/accounts/${id}/statuses`, { params: { pinned: true } })
+}
+
 export async function fetchUserFollowing(id: string, params?: Record<string, string | number | boolean>) {
   return apiClient<User[]>(`/api/v1/accounts/${id}/following`, { params })
 }
