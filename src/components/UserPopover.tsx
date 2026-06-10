@@ -1,6 +1,7 @@
 import React from 'react'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useAuthStore } from '@/store/auth'
 import type { User } from '@/store/auth'
 
 interface UserPopoverProps {
@@ -9,8 +10,16 @@ interface UserPopoverProps {
 }
 
 export function UserPopover({ user, children }: UserPopoverProps) {
-  const hideFollowers = user.pleroma?.hide_followers_count
-  const hideFollowing = user.pleroma?.hide_follows_count
+  const authUser = useAuthStore((state) => state.user)
+  const isOtherUser = user.id !== authUser?.id
+
+  const displayFollowers = isOtherUser && user.pleroma?.hide_followers_count
+    ? 'Hidden'
+    : (!isOtherUser && authUser ? authUser.followers_count : user.followers_count)
+
+  const displayFollowing = isOtherUser && user.pleroma?.hide_follows_count
+    ? 'Hidden'
+    : (!isOtherUser && authUser ? authUser.following_count : user.following_count)
 
   return (
     <Popover>
@@ -42,11 +51,11 @@ export function UserPopover({ user, children }: UserPopoverProps) {
               <span className="text-muted-foreground">Posts</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold">{hideFollowing ? 'Hidden' : user.following_count}</span>
+              <span className="font-bold">{displayFollowing}</span>
               <span className="text-muted-foreground">Following</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold">{hideFollowers ? 'Hidden' : user.followers_count}</span>
+              <span className="font-bold">{displayFollowers}</span>
               <span className="text-muted-foreground">Followers</span>
             </div>
           </div>
