@@ -245,3 +245,26 @@ export async function removeAccountsFromList(id: string, accountIds: string[]) {
     body: JSON.stringify({ account_ids: accountIds })
   })
 }
+
+// Notifications
+export interface Notification {
+  id: string
+  type: 'mention' | 'status' | 'reblog' | 'follow' | 'follow_request' | 'favourite' | 'poll' | 'update' | 'admin.sign_up' | 'admin.report'
+  created_at: string
+  account: User
+  status?: Status
+}
+
+export async function fetchNotifications(types?: string[]) {
+  const params: Record<string, string | string[]> = {}
+  if (types && types.length > 0) {
+    params['include_types[]'] = types
+  }
+  return apiClient<Notification[]>('/api/v1/notifications', { params })
+}
+
+export async function markNotificationsAsRead() {
+  return apiClient('/api/v1/pleroma/notifications/read', {
+    method: 'POST'
+  })
+}
