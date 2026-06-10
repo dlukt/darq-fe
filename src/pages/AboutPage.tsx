@@ -1,5 +1,5 @@
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router'
 import { fetchInstanceConfig, fetchNodeInfo, fetchTOS, lookupAccount } from '@/api/endpoints'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -38,7 +38,13 @@ function StaffMemberCard({ username }: { username: string }) {
         </Avatar>
         <div className="flex flex-col flex-1">
           <span className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
-          <span className="text-muted-foreground text-xs">@{user.acct}</span>
+          <Link 
+            to={`/${user.acct}`} 
+            className="text-muted-foreground text-xs hover:underline w-fit"
+            onClick={(e) => e.stopPropagation()}
+          >
+            @{user.acct}
+          </Link>
         </div>
       </div>
     </UserPopover>
