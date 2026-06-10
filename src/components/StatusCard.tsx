@@ -561,15 +561,22 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent h-8 w-8 text-muted-foreground hover:text-foreground">
+          <DropdownMenuTrigger 
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={(e) => e.stopPropagation()}
+          >
             <MoreHorizontal className="h-4 w-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => muteMutation.mutate()}>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation()
+              muteMutation.mutate()
+            }}>
               {muted ? "Unmute conversation" : "Mute conversation"}
             </DropdownMenuItem>
             {(url || uri) && (
-              <DropdownMenuItem onClick={() => {
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
                 const link = url || uri
                 if (link) {
                   navigator.clipboard.writeText(link)
@@ -579,7 +586,10 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
               </DropdownMenuItem>
             )}
             {(url || uri) && (
-              <DropdownMenuItem onClick={() => window.open(url || uri, '_blank', 'noopener,noreferrer')}>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
+                window.open(url || uri, '_blank', 'noopener,noreferrer')
+              }}>
                 External source
               </DropdownMenuItem>
             )}
@@ -587,13 +597,19 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
             {canDelete && (
               <DropdownMenuItem 
                 className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
-                onClick={() => deleteMutation.mutate()}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deleteMutation.mutate()
+                }}
               >
                 Delete post
               </DropdownMenuItem>
             )}
             {!canDelete && (
-              <DropdownMenuItem onClick={() => console.log('Report post clicked')}>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
+                console.log('Report post clicked')
+              }}>
                 Report
               </DropdownMenuItem>
             )}
