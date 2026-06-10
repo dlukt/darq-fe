@@ -12,6 +12,7 @@ export interface User {
   bot: boolean
   created_at: string
   note: string
+  fields?: Array<{ name: string; value: string; verified_at?: string }>
   url: string
   followers_count: number
   following_count: number

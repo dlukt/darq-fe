@@ -39,7 +39,7 @@ function StaffMemberCard({ username }: { username: string }) {
         <div className="flex flex-col flex-1">
           <span className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
           <Link 
-            to={`/${user.acct}`} 
+            to={`/@${user.acct}`} 
             className="text-muted-foreground text-xs hover:underline w-fit"
             onClick={(e) => e.stopPropagation()}
           >

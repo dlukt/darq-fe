@@ -294,3 +294,23 @@ export async function markNotificationsAsRead() {
     method: 'POST'
   })
 }
+
+export async function fetchAccount(id: string) {
+  return apiClient<User>(`/api/v1/accounts/${id}`)
+}
+
+export async function fetchUserStatuses(id: string, params?: Record<string, string | number | boolean>) {
+  return apiClient<Status[]>(`/api/v1/accounts/${id}/statuses`, { params })
+}
+
+export async function fetchUserFollowing(id: string, params?: Record<string, string | number | boolean>) {
+  return apiClient<User[]>(`/api/v1/accounts/${id}/following`, { params })
+}
+
+export async function fetchUserFollowers(id: string, params?: Record<string, string | number | boolean>) {
+  return apiClient<User[]>(`/api/v1/accounts/${id}/followers`, { params })
+}
+
+export async function fetchFavorites(params?: Record<string, string | number | boolean>) {
+  return apiClient<Status[]>(`/api/v1/favourites`, { params })
+}

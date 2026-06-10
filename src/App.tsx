@@ -8,6 +8,7 @@ import { StatusPage } from "@/pages/StatusPage"
 import { ListsPage } from "@/pages/ListsPage"
 import NotificationsPage from "@/pages/NotificationsPage"
 import AboutPage from "@/pages/AboutPage"
+import { ProfilePage } from "@/pages/ProfilePage"
 
 function App() {
   const { user } = useAuthStore()
@@ -28,6 +29,7 @@ function App() {
         <Route path="/status/:id" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/@:username" element={<ProfilePage />} />
       </Route>
     </Routes>
   )
