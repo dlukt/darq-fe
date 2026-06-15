@@ -85,7 +85,7 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
         itemContent={(index, status) => {
           if ('isPinned' in status && status.isPinned) {
             return (
-              <div key={`pinned-${status.id}`} className="relative">
+              <div key={`pinned-${status.id}`} className="relative pb-2">
                 <div className="absolute top-2 right-4 z-10 flex items-center text-muted-foreground bg-background/80 px-2 py-0.5 rounded text-xs font-semibold">
                   <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
@@ -96,7 +96,11 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
               </div>
             )
           }
-          return <StatusCard key={status.id} status={status} />
+          return (
+            <div className="pb-2">
+              <StatusCard key={status.id} status={status} />
+            </div>
+          )
         }}
         components={{
           Footer: () => (

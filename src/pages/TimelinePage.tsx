@@ -111,7 +111,9 @@ export function TimelinePage({ type }: TimelinePageProps) {
             useWindowScroll
             overscan={1000}
             itemContent={(index, status) => (
-              <StatusCard key={status.id} status={status} />
+              <div className="pb-2">
+                <StatusCard key={status.id} status={status} />
+              </div>
             )}
             components={{
               Footer: () => (
