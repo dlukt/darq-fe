@@ -34,7 +34,9 @@ const MorphImage: React.FC<MorphImageProps> = ({
 
     const imageRef = useRef<HTMLImageElement & HTMLVideoElement>(null);
     const generatedId = useId();
-    const finalLayoutId = (props as {layoutId?: string}).layoutId || `morph-image-${generatedId}`;
+    // Using src as part of the layoutId is crucial to prevent framer-motion from
+    // animating bounds when a virtualized list recycles the component for a different image.
+    const finalLayoutId = (props as {layoutId?: string}).layoutId || `morph-image-${src}-${generatedId}`;
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
