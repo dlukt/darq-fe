@@ -74,6 +74,13 @@ export interface PreviewCard {
   blurhash?: string
 }
 
+export interface Mention {
+  id: string
+  username: string
+  url: string
+  acct: string
+}
+
 export interface Status {
   id: string
   created_at: string
@@ -83,6 +90,7 @@ export interface Status {
   media_attachments?: MediaAttachment[]
   card?: PreviewCard | null
   poll?: Poll
+  mentions?: Mention[]
   replies_count?: number
   reblogs_count?: number
   favourites_count?: number
@@ -222,14 +230,32 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
       } else if (anchor.classList.contains('mention')) {
         e.preventDefault()
         e.stopPropagation()
-        const mentionText = anchor.textContent?.trim()
-        if (mentionText && mentionText.startsWith('@')) {
-          navigate(`/${mentionText}`)
+        
+        const originalHref = anchor.getAttribute('href')
+        const fullHref = anchor.href
+        
+        // Try to match the mention exactly from status.mentions
+        const mention = status.mentions?.find(m => m.url === originalHref || m.url === fullHref)
+        
+        if (mention) {
+          navigate(`/@${mention.acct}`)
         } else {
-          // Fallback if text doesn't start with @
-          const url = new URL(anchor.href, window.location.origin)
-          const handle = url.pathname.split('/').pop()
-          if (handle) navigate(`/${handle}`)
+          // Fallback if not found in mentions array
+          let acct = anchor.textContent?.trim() || ''
+          if (acct.startsWith('@')) acct = acct.substring(1)
+          
+          try {
+            const urlObj = new URL(fullHref)
+            // If the mention is remote and the text doesn't already contain the domain
+            if (urlObj.hostname !== window.location.hostname && !acct.includes('@')) {
+              // Sometimes the text inside is just the username, we can append the hostname
+              acct = `${acct}@${urlObj.hostname}`
+            }
+          } catch (e) {
+            // Ignore invalid URLs
+          }
+          
+          navigate(`/@${acct}`)
         }
       }
     }
