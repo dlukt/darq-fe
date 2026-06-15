@@ -23,9 +23,7 @@ export function UserPopover({ user, children }: UserPopoverProps) {
 
   return (
     <Popover>
-      <PopoverTrigger render={<div className="w-full text-left" />}>
-        {children}
-      </PopoverTrigger>
+      <PopoverTrigger render={React.isValidElement(children) ? children : <span className="inline-block">{children}</span>} />
       <PopoverContent className="w-80 p-0 overflow-hidden" side="right" align="start">
         <div className="h-24 w-full bg-muted">
           {user.header && <img src={user.header} alt="" className="h-full w-full object-cover" />}
