@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import iso6391 from "iso-639-1"
 
 const languages = iso6391.getAllCodes().map(code => ({
@@ -85,7 +85,9 @@ export function SettingsPage() {
                 </div>
                 <Select value={defaultLanguage} onValueChange={setDefaultLanguage}>
                   <SelectTrigger id="default-language" className="w-[180px]">
-                    <SelectValue placeholder="Select language" />
+                    <span className="truncate">
+                      {languages.find(l => l.value === defaultLanguage)?.label || "Select language"}
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     {languages.map(lang => (
