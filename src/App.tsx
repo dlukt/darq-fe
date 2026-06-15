@@ -25,6 +25,7 @@ function App() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/lists" element={<ListsPage />} />
+        <Route path="/tags/:id" element={<TimelinePage type="tag" />} />
         <Route path="/lists/:id" element={<TimelinePage type="list" />} />
         <Route path="/status/:id" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />

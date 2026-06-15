@@ -1,7 +1,7 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query"
 import { Virtuoso } from "react-virtuoso"
 import { Link, useParams } from "react-router"
-import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline, fetchListTimeline, fetchList } from "@/api/endpoints"
+import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline, fetchListTimeline, fetchList, fetchTagTimeline } from "@/api/endpoints"
 import { StatusCard } from "@/components/StatusCard"
 import { StatusComposer } from "@/components/StatusComposer"
 import { ListAccounts } from "@/components/ListAccounts"
@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 
 interface TimelinePageProps {
-  type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list"
+  type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list" | "tag"
 }
 
 export function TimelinePage({ type }: TimelinePageProps) {
@@ -24,6 +24,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
     bookmarks: "Bookmarks",
     direct: "Direct Messages",
     list: "List Timeline",
+    tag: `#${id}`,
   }[type]
 
   // Check if we should even attempt fetching (e.g. Home requires auth)
@@ -40,6 +41,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
         case "bookmarks": return fetchBookmarks(params)
         case "direct": return fetchDirectTimeline(params)
         case "list": return id ? fetchListTimeline(id, params) : Promise.resolve([])
+        case "tag": return id ? fetchTagTimeline(id, params) : Promise.resolve([])
       }
     },
     getNextPageParam: (lastPage) => {

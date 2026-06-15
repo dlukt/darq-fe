@@ -14,6 +14,7 @@ export const ENDPOINTS = {
     public: '/api/v1/timelines/public',
     home: '/api/v1/timelines/home',
     bubble: '/api/v1/timelines/bubble',
+    tag: (tag: string) => `/api/v1/timelines/tag/${tag}`,
   },
   statuses: {
     post: '/api/v1/statuses',
@@ -143,6 +144,10 @@ export async function fetchLocalTimeline(params?: Record<string, string | number
 
 export async function fetchFederatedTimeline(params?: Record<string, string | number | boolean>) {
   return apiClient<Status[]>(ENDPOINTS.timelines.public, { params })
+}
+
+export async function fetchTagTimeline(tag: string, params?: Record<string, string | number | boolean>) {
+  return apiClient<Status[]>(ENDPOINTS.timelines.tag(tag), { params })
 }
 
 export async function fetchBookmarks(params?: Record<string, string | number | boolean>) {

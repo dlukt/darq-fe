@@ -208,6 +208,33 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
     reactionMutation.mutate({ emoji, isReacted: !!existing?.me })
   }
 
+  const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    const anchor = target.closest('a')
+    
+    if (anchor) {
+      if (anchor.classList.contains('hashtag')) {
+        e.preventDefault()
+        e.stopPropagation()
+        const url = new URL(anchor.href, window.location.origin)
+        const tag = url.pathname.split('/').pop()
+        if (tag) navigate(`/tags/${tag}`)
+      } else if (anchor.classList.contains('mention')) {
+        e.preventDefault()
+        e.stopPropagation()
+        const mentionText = anchor.textContent?.trim()
+        if (mentionText && mentionText.startsWith('@')) {
+          navigate(`/${mentionText}`)
+        } else {
+          // Fallback if text doesn't start with @
+          const url = new URL(anchor.href, window.location.origin)
+          const handle = url.pathname.split('/').pop()
+          if (handle) navigate(`/${handle}`)
+        }
+      }
+    }
+  }
+
   const handleVoteSubmit = () => {
     if (selectedChoices.length === 0 || !poll) return
     voteMutation.mutate()
@@ -311,6 +338,7 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
             <div
               className="prose dark:prose-invert wrap-break-words max-w-none text-sm"
               dangerouslySetInnerHTML={{ __html: content }}
+              onClick={handleContentClick}
             />
 
             {/* Media Attachments */}
