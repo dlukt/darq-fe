@@ -14,7 +14,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
   const { type, account, status, created_at, pleroma } = notification
   const displayName = account.display_name || account.username
   const dateStr = new Date(created_at).toLocaleString()
-  
+
   const isUnread = pleroma?.is_seen === false
   const unreadIndicator = isUnread ? (
     <div className="absolute top-4 left-1.5 w-2 h-2 rounded-full bg-primary z-10 shadow-sm" title="Unread" />
@@ -36,9 +36,9 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 pl-14">
           <Repeat className="h-4 w-4 text-green-500" />
           <UserPopover user={account}>
-            <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
+            <span className="font-semibold text-foreground hover:underline cursor-pointer">
               {displayName}
-            </Link>
+            </span>
           </UserPopover>
           <span>repeated your post</span>
         </div>
@@ -54,9 +54,9 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 pl-14">
           <Heart className="h-4 w-4 text-pink-500 fill-current" />
           <UserPopover user={account}>
-            <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
+            <span className="font-semibold text-foreground hover:underline cursor-pointer">
               {displayName}
-            </Link>
+            </span>
           </UserPopover>
           <span>favourited your post</span>
         </div>
@@ -73,27 +73,27 @@ export function NotificationCard({ notification }: NotificationCardProps) {
           <CardHeader className="flex flex-row items-center gap-2 pb-2 text-sm text-muted-foreground">
             <UserPlus className="h-4 w-4 text-primary" />
             <UserPopover user={account}>
-              <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
+              <span className="font-semibold text-foreground hover:underline cursor-pointer">
                 {displayName}
-              </Link>
+              </span>
             </UserPopover>
             <span>followed you</span>
             <span className="ml-auto text-xs">{dateStr}</span>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
             <UserPopover user={account}>
-              <Link to={`/@${account.acct}`}>
+              <span className="cursor-pointer">
                 <Avatar>
                   <AvatarImage src={account.avatar} alt={displayName} />
                   <AvatarFallback>{displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
-              </Link>
+              </span>
             </UserPopover>
             <div className="flex flex-col">
               <UserPopover user={account}>
-                <Link to={`/@${account.acct}`} className="font-semibold hover:underline">
+                <span className="font-semibold hover:underline cursor-pointer">
                   {displayName}
-                </Link>
+                </span>
               </UserPopover>
               <Link to={`/@${account.acct}`} className="text-sm text-muted-foreground hover:underline">
                 @{account.acct}
