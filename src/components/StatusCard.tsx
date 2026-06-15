@@ -15,6 +15,7 @@ import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/store/auth"
 import { deleteStatus, toggleMuteConversation } from "@/api/endpoints"
+import { useSettingsStore } from "@/store/settings"
 
 import { 
   MessageCircle, 
@@ -152,8 +153,14 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
   // Format date
   const dateStr = new Date(created_at).toLocaleString()
 
+  const { showSensitiveMedia, expandContentWarnings } = useSettingsStore()
+
   const [isHidden, setIsHidden] = useState(false)
-  const [showContent, setShowContent] = useState(!sensitive && !spoiler_text)
+  const [showContent, setShowContent] = useState(() => {
+    if (spoiler_text) return expandContentWarnings
+    if (sensitive) return showSensitiveMedia
+    return true
+  })
   const [selectedChoices, setSelectedChoices] = useState<number[]>([])
   const [isReplying, setIsReplying] = useState(false)
   const [isQuoting, setIsQuoting] = useState(false)
@@ -251,7 +258,7 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
               // Sometimes the text inside is just the username, we can append the hostname
               acct = `${acct}@${urlObj.hostname}`
             }
-          } catch (e) {
+          } catch {
             // Ignore invalid URLs
           }
           

@@ -9,6 +9,7 @@ import { ListsPage } from "@/pages/ListsPage"
 import NotificationsPage from "@/pages/NotificationsPage"
 import AboutPage from "@/pages/AboutPage"
 import { ProfilePage } from "@/pages/ProfilePage"
+import { SettingsPage } from "@/pages/SettingsPage"
 
 function App() {
   const { user } = useAuthStore()
@@ -24,6 +25,7 @@ function App() {
         <Route path="/direct" element={<TimelinePage type="direct" />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/lists" element={<ListsPage />} />
         <Route path="/tags/:id" element={<TimelinePage type="tag" />} />
         <Route path="/lists/:id" element={<TimelinePage type="list" />} />
