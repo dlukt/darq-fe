@@ -35,7 +35,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         {unreadIndicator}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 pl-14">
           <Repeat className="h-4 w-4 text-green-500" />
-          <UserPopover account={account}>
+          <UserPopover user={account}>
             <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
               {displayName}
             </Link>
@@ -53,7 +53,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         {unreadIndicator}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 pl-14">
           <Heart className="h-4 w-4 text-pink-500 fill-current" />
-          <UserPopover account={account}>
+          <UserPopover user={account}>
             <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
               {displayName}
             </Link>
@@ -72,7 +72,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         <Card>
           <CardHeader className="flex flex-row items-center gap-2 pb-2 text-sm text-muted-foreground">
             <UserPlus className="h-4 w-4 text-primary" />
-            <UserPopover account={account}>
+            <UserPopover user={account}>
               <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
                 {displayName}
               </Link>
@@ -81,7 +81,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
             <span className="ml-auto text-xs">{dateStr}</span>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
-            <UserPopover account={account}>
+            <UserPopover user={account}>
               <Link to={`/@${account.acct}`}>
                 <Avatar>
                   <AvatarImage src={account.avatar} alt={displayName} />
@@ -90,7 +90,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
               </Link>
             </UserPopover>
             <div className="flex flex-col">
-              <UserPopover account={account}>
+              <UserPopover user={account}>
                 <Link to={`/@${account.acct}`} className="font-semibold hover:underline">
                   {displayName}
                 </Link>
