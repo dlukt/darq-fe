@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query"
+import { WindowVirtuoso } from "react-virtuoso"
 import { Link, useParams } from "react-router"
 import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline, fetchListTimeline, fetchList } from "@/api/endpoints"
-import { StatusCard, type Status } from "@/components/StatusCard"
+import { StatusCard } from "@/components/StatusCard"
 import { StatusComposer } from "@/components/StatusComposer"
 import { ListAccounts } from "@/components/ListAccounts"
 import { useAuthStore } from "@/store/auth"
@@ -14,18 +15,6 @@ interface TimelinePageProps {
 export function TimelinePage({ type }: TimelinePageProps) {
   const { user } = useAuthStore()
   const { id } = useParams()
-
-  // Select the appropriate fetcher
-  const queryFn = () => {
-    switch (type) {
-      case "home": return fetchHomeTimeline()
-      case "local": return fetchLocalTimeline()
-      case "federated": return fetchFederatedTimeline()
-      case "bookmarks": return fetchBookmarks()
-      case "direct": return fetchDirectTimeline()
-      case "list": return id ? fetchListTimeline(id) : Promise.resolve([])
-    }
-  }
 
   // Define titles for the UI
   const title = {
@@ -40,12 +29,29 @@ export function TimelinePage({ type }: TimelinePageProps) {
   // Check if we should even attempt fetching (e.g. Home requires auth)
   const isAuthRequired = (type === "home" || type === "bookmarks" || type === "direct" || type === "list") && !user
 
-  const { data: statuses, isLoading, isError, error } = useQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } = useInfiniteQuery({
     queryKey: ["timeline", type, id],
-    queryFn,
+    queryFn: ({ pageParam }) => {
+      const params = pageParam ? { max_id: pageParam as string } : {}
+      switch (type) {
+        case "home": return fetchHomeTimeline(params)
+        case "local": return fetchLocalTimeline(params)
+        case "federated": return fetchFederatedTimeline(params)
+        case "bookmarks": return fetchBookmarks(params)
+        case "direct": return fetchDirectTimeline(params)
+        case "list": return id ? fetchListTimeline(id, params) : Promise.resolve([])
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length === 0) return undefined
+      return lastPage[lastPage.length - 1].id
+    },
+    initialPageParam: undefined as string | undefined,
     retry: false,
     enabled: !isAuthRequired, // Don't fetch if it requires auth but we aren't logged in
   })
+
+  const statuses = data?.pages.flat() || []
 
   const { data: listData } = useQuery({
     queryKey: ["list", id],
@@ -87,17 +93,34 @@ export function TimelinePage({ type }: TimelinePageProps) {
         </div>
       )}
 
-      {!isLoading && !isError && !isAuthRequired && statuses?.length === 0 && (
+      {!isLoading && !isError && !isAuthRequired && statuses.length === 0 && (
         <div className="text-center p-8 text-muted-foreground">
           No posts to show right now.
         </div>
       )}
 
-      {!isAuthRequired && (
-        <div className="flex flex-col gap-2">
-          {statuses?.map((status: Status) => (
-            <StatusCard key={status.id} status={status} />
-          ))}
+      {!isAuthRequired && statuses.length > 0 && (
+        <div className="mt-4">
+          <WindowVirtuoso
+            data={statuses}
+            endReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage()
+              }
+            }}
+            useWindowScroll
+            overscan={1000}
+            itemContent={(index, status) => (
+              <StatusCard key={status.id} status={status} />
+            )}
+            components={{
+              Footer: () => (
+                <div className="py-4 text-center text-muted-foreground">
+                  {isFetchingNextPage ? "Loading more..." : !hasNextPage ? "No more posts" : ""}
+                </div>
+              ),
+            }}
+          />
         </div>
       )}
     </div>

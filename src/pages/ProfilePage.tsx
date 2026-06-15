@@ -1,6 +1,7 @@
 import React from 'react'
 import { useParams } from 'react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
+import { WindowVirtuoso } from 'react-virtuoso'
 import { useAuthStore } from '@/store/auth'
 import { 
   lookupAccount, 
@@ -32,55 +33,99 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
     retry: false
   })
 
-  const { data: statuses, isLoading, isError } = useQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } = useInfiniteQuery({
     queryKey: ['userTimeline', userId, type],
-    queryFn: () => {
-      if (type === 'favorites') return fetchFavorites()
+    queryFn: ({ pageParam }) => {
+      const params: Record<string, string | boolean> = pageParam ? { max_id: pageParam as string } : {}
       
-      const params: Record<string, string | boolean> = {}
+      if (type === 'favorites') return fetchFavorites(params)
+      
       if (type === 'posts') params.exclude_replies = true
       if (type === 'media') params.only_media = true
       
       return fetchUserStatuses(userId, params)
-    }
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length === 0) return undefined
+      return lastPage[lastPage.length - 1].id
+    },
+    initialPageParam: undefined as string | undefined,
+    retry: false
   })
+
+  const statuses = data?.pages.flat() || []
 
   if (isLoading || (type === 'posts' && isPinnedLoading)) return <div className="p-8 text-center text-muted-foreground">Loading statuses...</div>
   if (isError) return <div className="p-8 text-center text-red-500">Failed to load statuses.</div>
-  if ((!statuses || statuses.length === 0) && (!pinnedStatuses || pinnedStatuses.length === 0)) {
+  if (statuses.length === 0 && (!pinnedStatuses || pinnedStatuses.length === 0)) {
     return <div className="p-8 text-center text-muted-foreground">No statuses found.</div>
   }
 
   // Filter out pinned statuses from the main feed so they don't duplicate
   const pinnedIds = new Set(pinnedStatuses?.map(s => s.id) || [])
-  const filteredStatuses = statuses?.filter(s => !pinnedIds.has(s.id)) || []
+  const filteredStatuses = statuses.filter(s => !pinnedIds.has(s.id))
+  
+  // Create a combined array where pinned statuses are at the beginning
+  const combinedStatuses = [
+    ...(pinnedStatuses?.map(s => ({ ...s, isPinned: true })) || []),
+    ...filteredStatuses
+  ]
 
   return (
-    <div className="flex flex-col gap-2 mt-4">
-      {pinnedStatuses?.map(status => (
-        <div key={`pinned-${status.id}`} className="relative">
-          <div className="absolute top-2 right-4 z-10 flex items-center text-muted-foreground bg-background/80 px-2 py-0.5 rounded text-xs font-semibold">
-            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-            </svg>
-            Pinned
-          </div>
-          <StatusCard status={status} />
-        </div>
-      ))}
-      {filteredStatuses.map(status => (
-        <StatusCard key={status.id} status={status} />
-      ))}
+    <div className="mt-4">
+      <WindowVirtuoso
+        data={combinedStatuses}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
+          }
+        }}
+        useWindowScroll
+        overscan={1000}
+        itemContent={(index, status) => {
+          if ('isPinned' in status && status.isPinned) {
+            return (
+              <div key={`pinned-${status.id}`} className="relative">
+                <div className="absolute top-2 right-4 z-10 flex items-center text-muted-foreground bg-background/80 px-2 py-0.5 rounded text-xs font-semibold">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                  </svg>
+                  Pinned
+                </div>
+                <StatusCard status={status} />
+              </div>
+            )
+          }
+          return <StatusCard key={status.id} status={status} />
+        }}
+        components={{
+          Footer: () => (
+            <div className="py-4 text-center text-muted-foreground">
+              {isFetchingNextPage ? "Loading more..." : !hasNextPage ? "No more posts" : ""}
+            </div>
+          ),
+        }}
+      />
     </div>
   )
 }
 
 function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'following' | 'followers', isUs: boolean }) {
-  const { data: users, isLoading, isError, error } = useQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } = useInfiniteQuery({
     queryKey: ['userFollowList', userId, type],
-    queryFn: () => type === 'following' ? fetchUserFollowing(userId) : fetchUserFollowers(userId),
+    queryFn: ({ pageParam }) => {
+      const params = pageParam ? { max_id: pageParam as string } : {}
+      return type === 'following' ? fetchUserFollowing(userId, params) : fetchUserFollowers(userId, params)
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length === 0) return undefined
+      return lastPage[lastPage.length - 1].id
+    },
+    initialPageParam: undefined as string | undefined,
     retry: false
   })
+
+  const users = data?.pages.flat() || []
 
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading users...</div>
   if (isError) {
@@ -89,33 +134,52 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
     }
     return <div className="p-8 text-center text-red-500">Failed to load users.</div>
   }
-  if (!users || users.length === 0) return <div className="p-8 text-center text-muted-foreground">No users found.</div>
+  if (users.length === 0) return <div className="p-8 text-center text-muted-foreground">No users found.</div>
 
   return (
-    <div className="flex flex-col gap-4 mt-4">
-      {users.map(u => (
-        <UserPopover key={u.id} user={u}>
-          <div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full relative">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={u.avatar} alt={u.display_name || u.username} />
-              <AvatarFallback>{(u.display_name || u.username).charAt(0).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col flex-1">
-              <span className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: u.display_name || u.username }} />
-              <span className="text-muted-foreground text-xs">@{u.acct}</span>
-            </div>
-            
-            {isUs && type === 'following' && (
-              <div 
-                className="ml-auto" 
-                onClick={(e) => e.stopPropagation()} // Prevent opening popover when clicking switch
-              >
-                <FollowUserToggle userId={u.id} initialFollowing={true} />
+    <div className="mt-4">
+      <WindowVirtuoso
+        data={users}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
+          }
+        }}
+        useWindowScroll
+        overscan={1000}
+        itemContent={(index, u) => (
+          <div className="pb-4">
+            <UserPopover key={u.id} user={u}>
+              <div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full relative">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={u.avatar} alt={u.display_name || u.username} />
+                  <AvatarFallback>{(u.display_name || u.username).charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col flex-1">
+                  <span className="font-semibold text-sm" dangerouslySetInnerHTML={{ __html: u.display_name || u.username }} />
+                  <span className="text-muted-foreground text-xs">@{u.acct}</span>
+                </div>
+                
+                {isUs && type === 'following' && (
+                  <div 
+                    className="ml-auto" 
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <FollowUserToggle userId={u.id} initialFollowing={true} />
+                  </div>
+                )}
               </div>
-            )}
+            </UserPopover>
           </div>
-        </UserPopover>
-      ))}
+        )}
+        components={{
+          Footer: () => (
+            <div className="py-4 text-center text-muted-foreground">
+              {isFetchingNextPage ? "Loading more..." : ""}
+            </div>
+          ),
+        }}
+      />
     </div>
   )
 }
