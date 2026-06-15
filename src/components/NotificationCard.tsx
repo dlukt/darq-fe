@@ -3,6 +3,8 @@ import { StatusCard } from "@/components/StatusCard"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Repeat, Heart, UserPlus } from "lucide-react"
+import { UserPopover } from "@/components/UserPopover"
+import { Link } from "react-router"
 
 interface NotificationCardProps {
   notification: Notification
@@ -33,7 +35,11 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         {unreadIndicator}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 pl-14">
           <Repeat className="h-4 w-4 text-green-500" />
-          <span className="font-semibold text-foreground">{displayName}</span>
+          <UserPopover account={account}>
+            <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
+              {displayName}
+            </Link>
+          </UserPopover>
           <span>repeated your post</span>
         </div>
         <StatusCard status={status} />
@@ -47,7 +53,11 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         {unreadIndicator}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 pl-14">
           <Heart className="h-4 w-4 text-pink-500 fill-current" />
-          <span className="font-semibold text-foreground">{displayName}</span>
+          <UserPopover account={account}>
+            <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
+              {displayName}
+            </Link>
+          </UserPopover>
           <span>favourited your post</span>
         </div>
         <StatusCard status={status} />
@@ -62,18 +72,32 @@ export function NotificationCard({ notification }: NotificationCardProps) {
         <Card>
           <CardHeader className="flex flex-row items-center gap-2 pb-2 text-sm text-muted-foreground">
             <UserPlus className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-foreground">{displayName}</span>
+            <UserPopover account={account}>
+              <Link to={`/@${account.acct}`} className="font-semibold text-foreground hover:underline">
+                {displayName}
+              </Link>
+            </UserPopover>
             <span>followed you</span>
             <span className="ml-auto text-xs">{dateStr}</span>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
-            <Avatar>
-              <AvatarImage src={account.avatar} alt={displayName} />
-              <AvatarFallback>{displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <UserPopover account={account}>
+              <Link to={`/@${account.acct}`}>
+                <Avatar>
+                  <AvatarImage src={account.avatar} alt={displayName} />
+                  <AvatarFallback>{displayName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </Link>
+            </UserPopover>
             <div className="flex flex-col">
-              <span className="font-semibold">{displayName}</span>
-              <span className="text-sm text-muted-foreground">@{account.acct}</span>
+              <UserPopover account={account}>
+                <Link to={`/@${account.acct}`} className="font-semibold hover:underline">
+                  {displayName}
+                </Link>
+              </UserPopover>
+              <Link to={`/@${account.acct}`} className="text-sm text-muted-foreground hover:underline">
+                @{account.acct}
+              </Link>
             </div>
           </CardContent>
         </Card>
