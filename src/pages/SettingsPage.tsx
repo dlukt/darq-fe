@@ -6,9 +6,16 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import iso6391 from "iso-639-1"
+
+const languages = iso6391.getAllCodes().map(code => ({
+  value: code,
+  label: iso6391.getNativeName(code) || iso6391.getName(code)
+}))
 
 export function SettingsPage() {
-  const { showSensitiveMedia, expandContentWarnings, setShowSensitiveMedia, setExpandContentWarnings } = useSettingsStore()
+  const { showSensitiveMedia, expandContentWarnings, defaultLanguage, setShowSensitiveMedia, setExpandContentWarnings, setDefaultLanguage } = useSettingsStore()
   const { theme, setTheme } = useTheme()
 
   return (
@@ -67,6 +74,27 @@ export function SettingsPage() {
                   checked={expandContentWarnings}
                   onCheckedChange={setExpandContentWarnings}
                 />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between space-x-2">
+                <div className="flex flex-col space-y-1">
+                  <Label htmlFor="default-language">Default language</Label>
+                  <span className="text-sm text-muted-foreground">
+                    The default language selected when composing a new post.
+                  </span>
+                </div>
+                <Select value={defaultLanguage} onValueChange={setDefaultLanguage}>
+                  <SelectTrigger id="default-language" className="w-[180px]">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map(lang => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>

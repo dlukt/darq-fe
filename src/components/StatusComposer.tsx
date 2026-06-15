@@ -16,6 +16,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useSettingsStore } from "@/store/settings"
 import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus, Quote } from "lucide-react"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 
@@ -71,6 +72,7 @@ export interface StatusComposerProps {
 export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSuccess, className = "mb-6" }: StatusComposerProps = {}) {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
+  const defaultLanguage = useSettingsStore(state => state.defaultLanguage)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [attachments, setAttachments] = useState<Attachment[]>([])
@@ -82,7 +84,7 @@ export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSu
       visibility: "public",
       localOnly: false,
       contentType: "text/plain",
-      language: "en",
+      language: defaultLanguage,
       showCW: false,
       contentWarning: "",
       poll: {
