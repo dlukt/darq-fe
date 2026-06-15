@@ -262,7 +262,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                                 alt={item.alt}
                                 type={item.type}
                                 className="w-full h-full"
-                                layoutId={`image-gallery-${uniqueGalleryId}-${item.src}`}
                                 onClick={() => handleImageClick(item, index)}
                             />
                         ) : null}

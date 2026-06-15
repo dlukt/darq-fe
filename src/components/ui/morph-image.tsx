@@ -36,7 +36,6 @@ const MorphImage: React.FC<MorphImageProps> = ({
     const generatedId = useId();
     // Using src as part of the layoutId is crucial to prevent framer-motion from
     // animating bounds when a virtualized list recycles the component for a different image.
-    const finalLayoutId = (props as {layoutId?: string}).layoutId || `morph-image-${src}-${generatedId}`;
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -66,13 +65,11 @@ const MorphImage: React.FC<MorphImageProps> = ({
         <motion.video
             initial={false}
             src={src}
-            layoutId={finalLayoutId}
             className={cn(
                 "w-full h-full object-cover object-center not-prose cursor-zoom-in",
                 className,
             )}
             onClick={() => setIsOpen(true)}
-            transition={transition}
             autoPlay={type === "gifv"}
             loop={type === "gifv"}
             muted
@@ -84,13 +81,11 @@ const MorphImage: React.FC<MorphImageProps> = ({
             initial={false}
             src={src}
             alt={alt}
-            layoutId={finalLayoutId}
             className={cn(
                 "w-full h-full object-cover object-center not-prose cursor-zoom-in",
                 className,
             )}
             onClick={() => setIsOpen(true)}
-            transition={transition}
             {...props}
         />
     );
@@ -105,7 +100,6 @@ const MorphImage: React.FC<MorphImageProps> = ({
                         initial={{ opacity: 0, pointerEvents: "none" }}
                         animate={{ opacity: 1, pointerEvents: "auto" }}
                         exit={{ opacity: 0, pointerEvents: "none" }}
-                        transition={transition}
                     />
                     <motion.div
                         key="container"
@@ -113,18 +107,15 @@ const MorphImage: React.FC<MorphImageProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={transition}
                     >
                         {isVideo ? (
                             <motion.video
                                 ref={imageRef}
                                 src={src}
-                                layoutId={finalLayoutId}
                                 className={cn(
                                     "object-cover object-center max-w-[100vw] max-h-[100dvh] pointer-events-auto cursor-zoom-out rounded-none overflow-hidden",
                                 )}
                                 onClick={(e) => handleClick(e as unknown as React.MouseEvent<HTMLImageElement>)}
-                                transition={transition}
                                 autoPlay
                                 controls={type === "video"}
                                 loop={type === "gifv"}
@@ -135,12 +126,10 @@ const MorphImage: React.FC<MorphImageProps> = ({
                                 ref={imageRef}
                                 src={src}
                                 alt={alt}
-                                layoutId={finalLayoutId}
                                 className={cn(
                                     "object-cover object-center max-w-[100vw] max-h-[100dvh] pointer-events-auto cursor-zoom-out rounded-none overflow-hidden",
                                 )}
                                 onClick={(e) => handleClick(e)}
-                                transition={transition}
                             />
                         )}
                     </motion.div>
