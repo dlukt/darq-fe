@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate, Link } from "react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus, toggleBookmarkStatus, toggleReaction } from "@/api/endpoints"
 
@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ImageGallery, type ImageItem } from "@/components/ui/image-gallery"
 import { StatusComposer } from "@/components/StatusComposer"
+import { UserPopover } from "@/components/UserPopover"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/store/auth"
@@ -325,16 +326,22 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
         }}
       >
         <CardHeader className="flex flex-row items-center gap-4 pb-2">
-        <Avatar>
-          <AvatarImage src={account.avatar} alt={displayName} />
-          <AvatarFallback>
-            {displayName.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+          <UserPopover user={account as unknown as import("@/store/auth").User}>
+            <Avatar className="cursor-pointer">
+              <AvatarImage src={account.avatar} alt={displayName} />
+              <AvatarFallback>
+                {displayName.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </UserPopover>
         <div className="flex flex-col">
-          <span className="font-semibold">{displayName}</span>
+          <Link to={`/@${account.acct}`} className="font-semibold hover:underline" onClick={(e) => e.stopPropagation()}>
+            <span dangerouslySetInnerHTML={{ __html: displayName }} />
+          </Link>
           <span className="text-sm text-muted-foreground">
-            @{account.acct} &middot; {dateStr}
+            <Link to={`/@${account.acct}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
+              @{account.acct}
+            </Link> &middot; {dateStr}
           </span>
         </div>
 

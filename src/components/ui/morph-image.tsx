@@ -1,21 +1,14 @@
 "use client";
-import { useEffect, useRef, useState, useId } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
 
-import { AnimatePresence, motion, type Transition, type HTMLMotionProps } from "framer-motion";
+import { AnimatePresence, motion, type HTMLMotionProps } from "framer-motion";
 
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useEventListener } from "@/hooks/useEventListener";
 import { cn } from "@/lib/utils";
 
-const transition: Transition = {
-    duration: 0.3,
-    ease: [0.4, 0, 0.2, 1],
-    type: "spring",
-    stiffness: 120,
-    damping: 15,
-};
 
 interface MorphImageProps extends HTMLMotionProps<"img"> {
     type?: "image" | "video" | "gifv" | "audio" | "unknown";
@@ -33,7 +26,6 @@ const MorphImage: React.FC<MorphImageProps> = ({
     const [mounted, setMounted] = useState(false);
 
     const imageRef = useRef<HTMLImageElement & HTMLVideoElement>(null);
-    const generatedId = useId();
     // Using src as part of the layoutId is crucial to prevent framer-motion from
     // animating bounds when a virtualized list recycles the component for a different image.
 
