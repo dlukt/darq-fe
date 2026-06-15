@@ -3,6 +3,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuthStore } from '@/store/auth'
 import type { User } from '@/store/auth'
+import { Link } from 'react-router'
 
 interface UserPopoverProps {
   user: User
@@ -35,7 +36,7 @@ export function UserPopover({ user, children }: UserPopoverProps) {
           </Avatar>
           <div className="mt-10 flex flex-col">
             <span className="font-bold" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
-            <span className="text-muted-foreground text-sm">@{user.acct}</span>
+            <Link to={`/@${user.acct}`} className="text-muted-foreground text-sm hover:underline">@{user.acct}</Link>
           </div>
           {user.note && (
             <div 
