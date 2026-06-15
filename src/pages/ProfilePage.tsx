@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams } from 'react-router'
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
-import { WindowVirtuoso } from 'react-virtuoso'
+import { Virtuoso } from 'react-virtuoso'
 import { useAuthStore } from '@/store/auth'
 import { 
   lookupAccount, 
@@ -73,7 +73,7 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
 
   return (
     <div className="mt-4">
-      <WindowVirtuoso
+      <Virtuoso
         data={combinedStatuses}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
@@ -138,7 +138,7 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
 
   return (
     <div className="mt-4">
-      <WindowVirtuoso
+      <Virtuoso
         data={users}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {

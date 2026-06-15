@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query"
-import { WindowVirtuoso } from "react-virtuoso"
+import { Virtuoso } from "react-virtuoso"
 import { Link, useParams } from "react-router"
 import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBookmarks, fetchDirectTimeline, fetchListTimeline, fetchList } from "@/api/endpoints"
 import { StatusCard } from "@/components/StatusCard"
@@ -101,7 +101,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
 
       {!isAuthRequired && statuses.length > 0 && (
         <div className="mt-4">
-          <WindowVirtuoso
+          <Virtuoso
             data={statuses}
             endReached={() => {
               if (hasNextPage && !isFetchingNextPage) {
