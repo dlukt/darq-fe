@@ -62,6 +62,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
 
     const thumbnail = isVideo ? (
         <motion.video
+            initial={false}
             src={src}
             layoutId={finalLayoutId}
             className={cn(
@@ -78,6 +79,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
         />
     ) : (
         <motion.img
+            initial={false}
             src={src}
             alt={alt}
             layoutId={finalLayoutId}
