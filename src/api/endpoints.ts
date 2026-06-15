@@ -258,6 +258,10 @@ export interface Notification {
   created_at: string
   account: User
   status?: Status
+  pleroma?: {
+    is_seen?: boolean
+    is_muted?: boolean
+  }
 }
 
 export async function fetchNotifications(types?: string[]) {

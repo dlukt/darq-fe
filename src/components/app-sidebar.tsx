@@ -19,10 +19,14 @@ import { Home, Settings, Moon, Sun, Monitor, Globe, Users, Bookmark, Mail, List 
 import { useTheme } from "@/components/theme-provider"
 import { Link, useLocation } from "react-router"
 import { NavUser } from "./nav-user"
+import { useNotifications } from "@/hooks/useNotifications"
 
 export function AppSidebar() {
   const { theme, setTheme } = useTheme()
   const location = useLocation()
+  const { data: notifications } = useNotifications()
+
+  const unreadCount = notifications?.filter(n => n.pleroma?.is_seen === false).length || 0
 
   const ThemeIcon = theme === "system" ? Monitor : theme === "dark" ? Moon : Sun;
   const themeText = theme === "system" ? "System" : theme === "dark" ? "Dark" : "Light";
@@ -72,8 +76,17 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton isActive={location.pathname === "/notifications"} render={<Link to="/notifications" />}>
-                  <Bell />
-                  <span>Notifications</span>
+                  <div className="flex items-center w-full justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell />
+                      <span>Notifications</span>
+                    </div>
+                    {unreadCount > 0 && (
+                      <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
