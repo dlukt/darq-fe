@@ -6,7 +6,7 @@ export function MainLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="w-full h-screen overflow-y-auto">
+      <main className="w-full">
         <div className="flex p-2 items-center">
           <SidebarTrigger />
         </div>
