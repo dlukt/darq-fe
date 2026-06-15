@@ -56,8 +56,8 @@ export default function NotificationsPage() {
       </div>
 
       <Tabs defaultValue="mentions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 h-auto p-1">
-          <TabsTrigger value="mentions" className="flex items-center gap-2 py-2">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="mentions" className="flex items-center gap-2">
             Mentions
             {unreadMentions > 0 && (
               <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -65,7 +65,7 @@ export default function NotificationsPage() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="interactions" className="flex items-center gap-2 py-2">
+          <TabsTrigger value="interactions" className="flex items-center gap-2">
             <span className="truncate">Repeats & Favorites</span>
             {unreadInteractions > 0 && (
               <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -73,7 +73,7 @@ export default function NotificationsPage() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="follows" className="flex items-center gap-2 py-2">
+          <TabsTrigger value="follows" className="flex items-center gap-2">
             <span className="truncate">New Follows</span>
             {unreadFollows > 0 && (
               <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full">
