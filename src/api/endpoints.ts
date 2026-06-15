@@ -298,9 +298,15 @@ export async function lookupAccount(username: string) {
   return apiClient<Account>(`/api/v1/accounts/lookup`, { params: { acct: username } })
 }
 
-export async function markNotificationsAsRead() {
+export async function markNotificationsAsRead(maxId?: string) {
+  const body = maxId ? JSON.stringify({ max_id: maxId }) : undefined;
+  
   return apiClient('/api/v1/pleroma/notifications/read', {
-    method: 'POST'
+    method: 'POST',
+    body,
+    headers: maxId ? {
+      'Content-Type': 'application/json'
+    } : undefined
   })
 }
 

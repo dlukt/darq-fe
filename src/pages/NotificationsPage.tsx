@@ -14,8 +14,10 @@ export default function NotificationsPage() {
 
   const handleReadAll = async () => {
     try {
+      if (!notifications || notifications.length === 0) return;
       setIsMarkingRead(true)
-      await markNotificationsAsRead()
+      const maxId = notifications[0].id;
+      await markNotificationsAsRead(maxId)
       // Optimistically clear the unread status
       queryClient.setQueryData(["notifications", "all"], (oldData: Notification[] | undefined) => {
         if (!oldData) return oldData
