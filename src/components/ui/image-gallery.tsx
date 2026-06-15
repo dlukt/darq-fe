@@ -76,8 +76,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         }, 100);
 
         // Create ResizeObserver to track container size changes
+        // Only update if difference is significant to prevent scrollbar feedback loops
+        let lastWidth = container.clientWidth;
         const resizeObserver = new ResizeObserver(() => {
-            setContainerWidth(container.clientWidth);
+            const newWidth = container.clientWidth;
+            if (Math.abs(newWidth - lastWidth) > 25) {
+                lastWidth = newWidth;
+                setContainerWidth(newWidth);
+            }
         });
 
         resizeObserver.observe(container);
@@ -98,13 +104,20 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         return Math.min(cols, Math.max(1, images.length));
     }, [windowSize.width, columns.mobile, columns.tablet, columns.desktop, images.length]);
 
-    // Randomize dimensions for images that don't have them
-    const getRandomDimensions = useCallback(() => {
+    // Deterministic dimensions for images that don't have them
+    const getFallbackDimensions = useCallback((src: string) => {
+        // Simple hash of the src string to get a deterministic index
+        let hash = 0;
+        for (let i = 0; i < src.length; i++) {
+            hash = (hash << 5) - hash + src.charCodeAt(i);
+            hash |= 0; // Convert to 32bit integer
+        }
+        
         const aspectRatios = [0.75, 1, 1.5, 2];
-        const randomAspectRatio =
-            aspectRatios[Math.floor(Math.random() * aspectRatios.length)];
+        const randomAspectRatio = aspectRatios[Math.abs(hash) % aspectRatios.length];
+        
         const baseWidth = 600;
-        const width = baseWidth + Math.floor(Math.random() * 400);
+        const width = baseWidth + (Math.abs(hash) % 400);
         const height = Math.round(width / randomAspectRatio);
         return { width, height };
     }, []);
@@ -117,7 +130,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             if (!image.width || !image.height) {
                 return {
                     ...image,
-                    ...getRandomDimensions(),
+                    ...getFallbackDimensions(image.src),
                 };
             }
             return image;
@@ -134,7 +147,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         }
 
         return result;
-    }, [images, filterImages, sortImages, getRandomDimensions]);
+    }, [images, filterImages, sortImages, getFallbackDimensions]);
 
     const { layout, totalHeight } = useMasonry(
         processedImages,
