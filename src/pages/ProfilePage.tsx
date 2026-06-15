@@ -17,6 +17,8 @@ import {
   followTag,
   unfollowTag
 } from '@/api/endpoints'
+import { ProfileActions } from '@/components/ProfileActions'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
@@ -284,6 +286,7 @@ function FollowTagToggle({ tagName, initialFollowing }: { tagName: string, initi
   )
 }
 
+
 export function ProfilePage() {
   const { handle } = useParams()
   const authUser = useAuthStore(state => state.user)
@@ -335,6 +338,11 @@ export function ProfilePage() {
   const displayFollowers = isUs ? user.followers_count : (user.pleroma?.hide_followers_count ? 'Hidden' : user.followers_count)
   const displayFollowing = isUs ? user.following_count : (user.pleroma?.hide_follows_count ? 'Hidden' : user.following_count)
 
+  const daysSinceCreation = Math.max(1, Math.ceil((new Date().getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)))
+  const postsPerDay = Math.round(user.statuses_count / daysSinceCreation)
+  const isAdmin = user.pleroma?.is_admin
+  const isMod = user.pleroma?.is_moderator
+
   return (
     <div className="max-w-3xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
@@ -349,9 +357,16 @@ export function ProfilePage() {
             <AvatarFallback className="text-2xl">{(user.display_name || user.username).charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           
-          <div className="pt-14 flex flex-col">
-            <h1 className="text-2xl font-bold" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
-            <span className="text-muted-foreground">@{user.acct}</span>
+          <div className="pt-14 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold" dangerouslySetInnerHTML={{ __html: user.display_name || user.username }} />
+                {isAdmin && <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Admin</span>}
+                {isMod && !isAdmin && <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Moderator</span>}
+              </div>
+              <span className="text-muted-foreground">@{user.acct}</span>
+            </div>
+            <ProfileActions user={user} />
           </div>
 
           {user.note && (
@@ -379,10 +394,14 @@ export function ProfilePage() {
             </div>
           )}
 
-          <div className="mt-6 flex gap-6 text-sm">
+          <div className="mt-6 flex flex-wrap gap-6 text-sm">
             <div className="flex gap-1.5 items-center">
               <span className="font-bold">{user.statuses_count}</span>
               <span className="text-muted-foreground">Posts</span>
+            </div>
+            <div className="flex gap-1.5 items-center">
+              <span className="font-bold">{postsPerDay}</span>
+              <span className="text-muted-foreground">Posts per day</span>
             </div>
             <div className="flex gap-1.5 items-center">
               <span className="font-bold">{displayFollowing}</span>

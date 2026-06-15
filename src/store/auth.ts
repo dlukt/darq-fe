@@ -32,6 +32,8 @@ export interface User {
     is_moderator?: boolean
     hide_followers_count?: boolean
     hide_follows_count?: boolean
+    is_active?: boolean
+    tags?: string[]
   }
 }
 

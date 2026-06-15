@@ -353,3 +353,80 @@ export async function followTag(name: string) {
 export async function unfollowTag(name: string) {
   return apiClient.post(`/api/v1/tags/${name}/unfollow`)
 }
+
+export async function muteUser(id: string) {
+  return apiClient.post(`/api/v1/accounts/${id}/mute`)
+}
+
+export async function unmuteUser(id: string) {
+  return apiClient.post(`/api/v1/accounts/${id}/unmute`)
+}
+
+// Moderation Endpoints
+export async function tagUser(nickname: string, tag: string) {
+  return apiClient.put(`/api/v1/pleroma/admin/users/tag`, {
+    nicknames: [nickname],
+    tags: [tag]
+  })
+}
+
+export async function untagUser(nickname: string, tag: string) {
+  // apiClient.delete might not support body in our implementation, so we use a custom fetch or extend apiClient
+  const { useAuthStore } = await import('@/store/auth')
+  const { token, instanceUrl } = useAuthStore.getState()
+  
+  if (!instanceUrl || !token) throw new Error("Not authenticated")
+  
+  const response = await fetch(`${instanceUrl}/api/v1/pleroma/admin/users/tag`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      nicknames: [nickname],
+      tags: [tag]
+    })
+  })
+  
+  if (!response.ok) {
+    throw new Error(`Failed to untag user: ${response.statusText}`)
+  }
+}
+
+export async function deactivateUser(nickname: string) {
+  return apiClient.patch(`/api/v1/pleroma/admin/users/deactivate`, {
+    nicknames: [nickname]
+  })
+}
+
+export async function activateUser(nickname: string) {
+  return apiClient.patch(`/api/v1/pleroma/admin/users/activate`, {
+    nicknames: [nickname]
+  })
+}
+
+export async function deleteAdminUser(nickname: string) {
+  return apiClient.delete(`/api/v1/pleroma/admin/users?nickname=${nickname}`)
+}
+
+export interface Relationship {
+  id: string
+  following: boolean
+  showing_reblogs: boolean
+  notifying: boolean
+  followed_by: boolean
+  blocking: boolean
+  blocked_by: boolean
+  muting: boolean
+  muting_notifications: boolean
+  requested: boolean
+  domain_blocking: boolean
+  endorsed: boolean
+  note: string
+}
+
+export async function fetchRelationship(id: string) {
+  const data = await apiClient<Relationship[]>(`/api/v1/accounts/relationships?id[]=${id}`)
+  return data[0]
+}
