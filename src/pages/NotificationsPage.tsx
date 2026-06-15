@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { markNotificationsAsRead, type Notification } from "@/api/endpoints"
 import { NotificationCard } from "@/components/NotificationCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Check } from "lucide-react"
+import { Loader2, CheckCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/hooks/useNotifications"
 
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
           <p className="text-muted-foreground">Catch up on your recent interactions.</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleReadAll} disabled={isMarkingRead}>
-          {isMarkingRead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+          {isMarkingRead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCheck className="h-4 w-4 mr-2" />}
           Read all
         </Button>
       </div>
