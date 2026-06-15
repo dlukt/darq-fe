@@ -144,6 +144,7 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
   // Format date
   const dateStr = new Date(created_at).toLocaleString()
 
+  const [isHidden, setIsHidden] = useState(false)
   const [showContent, setShowContent] = useState(!sensitive && !spoiler_text)
   const [selectedChoices, setSelectedChoices] = useState<number[]>([])
   const [isReplying, setIsReplying] = useState(false)
@@ -236,6 +237,21 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
         }
       })
     : []
+
+  if (isHidden) {
+    return (
+      <div className={`mb-4 w-full ${isDescendant ? "pl-8" : ""}`}>
+        <Card className="w-full bg-muted/30">
+          <CardContent className="p-4 flex items-center justify-between text-sm text-muted-foreground">
+            <span>Post hidden</span>
+            <Button variant="ghost" size="sm" onClick={() => setIsHidden(false)}>
+              Undo
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className={`mb-4 w-full ${isDescendant ? "pl-8 relative before:absolute before:left-4 before:top-0 before:-bottom-8 before:w-0.5 before:bg-border last:before:hidden" : ""}`}>
@@ -585,6 +601,14 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
                 Copy link to post
               </DropdownMenuItem>
             )}
+            
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation()
+              setIsHidden(true)
+            }}>
+              Hide for me
+            </DropdownMenuItem>
+            
             {(url || uri) && (
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation()
