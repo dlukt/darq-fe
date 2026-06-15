@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import type React from "react";
 
@@ -33,6 +33,8 @@ const MorphImage: React.FC<MorphImageProps> = ({
     const [mounted, setMounted] = useState(false);
 
     const imageRef = useRef<HTMLImageElement & HTMLVideoElement>(null);
+    const generatedId = useId();
+    const finalLayoutId = (props as {layoutId?: string}).layoutId || `morph-image-${generatedId}`;
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -61,7 +63,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
     const thumbnail = isVideo ? (
         <motion.video
             src={src}
-            layoutId="morph-image"
+            layoutId={finalLayoutId}
             className={cn(
                 "w-full h-full object-cover object-center not-prose cursor-zoom-in",
                 className,
@@ -78,7 +80,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
         <motion.img
             src={src}
             alt={alt}
-            layoutId="morph-image"
+            layoutId={finalLayoutId}
             className={cn(
                 "w-full h-full object-cover object-center not-prose cursor-zoom-in",
                 className,
@@ -113,7 +115,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
                             <motion.video
                                 ref={imageRef}
                                 src={src}
-                                layoutId={(props as {layoutId?: string}).layoutId || "morph-image"}
+                                layoutId={finalLayoutId}
                                 className={cn(
                                     "object-cover object-center max-w-[100vw] max-h-[100dvh] pointer-events-auto cursor-zoom-out rounded-none overflow-hidden",
                                 )}
@@ -129,7 +131,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
                                 ref={imageRef}
                                 src={src}
                                 alt={alt}
-                                layoutId={(props as {layoutId?: string}).layoutId || "morph-image"}
+                                layoutId={finalLayoutId}
                                 className={cn(
                                     "object-cover object-center max-w-[100vw] max-h-[100dvh] pointer-events-auto cursor-zoom-out rounded-none overflow-hidden",
                                 )}
