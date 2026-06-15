@@ -62,8 +62,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
     const isVideo = type === "video" || type === "gifv";
 
     const thumbnail = isVideo ? (
-        <motion.video
-            initial={false}
+        <video
             src={src}
             className={cn(
                 "w-full h-full object-cover object-center not-prose cursor-zoom-in",
@@ -74,11 +73,10 @@ const MorphImage: React.FC<MorphImageProps> = ({
             loop={type === "gifv"}
             muted
             playsInline
-            {...(props as unknown as React.ComponentProps<typeof motion.video>)}
+            {...(props as unknown as React.ComponentProps<"video">)}
         />
     ) : (
-        <motion.img
-            initial={false}
+        <img
             src={src}
             alt={alt}
             className={cn(
@@ -100,13 +98,15 @@ const MorphImage: React.FC<MorphImageProps> = ({
                         initial={{ opacity: 0, pointerEvents: "none" }}
                         animate={{ opacity: 1, pointerEvents: "auto" }}
                         exit={{ opacity: 0, pointerEvents: "none" }}
+                        transition={{ duration: 0.2 }}
                     />
                     <motion.div
                         key="container"
                         className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none "
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                         {isVideo ? (
                             <motion.video
