@@ -37,21 +37,19 @@ export function ProfileActions({ user }: { user: User }) {
         variant={relationship?.following ? "outline" : "default"} 
         onClick={() => followMutation.mutate()}
         disabled={followMutation.isPending || !relationship}
-        size="sm"
       >
-        {relationship?.following ? <><UserMinus className="w-4 h-4 mr-2"/> Unfollow</> : <><UserPlus className="w-4 h-4 mr-2"/> Follow</>}
+        {relationship?.following ? <><UserMinus /> Unfollow</> : <><UserPlus /> Follow</>}
       </Button>
       <Button 
         variant={relationship?.muting ? "destructive" : "outline"} 
         onClick={() => muteMutation.mutate()}
         disabled={muteMutation.isPending || !relationship}
-        size="sm"
       >
-        {relationship?.muting ? <><Volume2 className="w-4 h-4 mr-2"/> Unmute</> : <><VolumeX className="w-4 h-4 mr-2"/> Mute</>}
+        {relationship?.muting ? <><Volume2 /> Unmute</> : <><VolumeX /> Mute</>}
       </Button>
-      <Button variant="outline" size="sm" asChild>
+      <Button variant="outline" asChild>
         <Link to={`/?compose=true&mention=${user.acct}`}>
-          <AtSign className="w-4 h-4 mr-2" /> Mention
+          <AtSign /> Mention
         </Link>
       </Button>
       {isAdminOrMod && <ModerationMenu user={user} />}

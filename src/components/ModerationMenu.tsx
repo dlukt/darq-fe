@@ -11,7 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem
+  DropdownMenuCheckboxItem,
+  DropdownMenuGroup
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 
@@ -96,57 +97,62 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Moderation</DropdownMenuLabel>
-        
-        <DropdownMenuItem 
-          onClick={() => toggleActivationMutation.mutate(isActive)}
-          disabled={toggleActivationMutation.isPending}
-        >
-          {isActive ? "Deactivate account" : "Activate account"}
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Moderation</DropdownMenuLabel>
+          
+          <DropdownMenuItem 
+            onClick={() => toggleActivationMutation.mutate(isActive)}
+            disabled={toggleActivationMutation.isPending}
+          >
+            {isActive ? "Deactivate account" : "Activate account"}
+          </DropdownMenuItem>
 
-        <DropdownMenuItem 
-          onClick={handleDelete}
-          className="text-red-500 focus:text-red-500"
-          disabled={deleteMutation.isPending}
-        >
-          Delete account
-        </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={handleDelete}
+            className="text-red-500 focus:text-red-500"
+            disabled={deleteMutation.isPending}
+          >
+            Delete account
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         
         <DropdownMenuSeparator />
-        <DropdownMenuLabel>MRF Tags</DropdownMenuLabel>
-        
-        <DropdownMenuCheckboxItem
-          checked={hasTag(MRF_TAGS.FORCE_NSFW)}
-          onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.FORCE_NSFW, checked)}
-          disabled={toggleTagMutation.isPending}
-        >
-          Mark all posts as NSFW
-        </DropdownMenuCheckboxItem>
-        
-        <DropdownMenuCheckboxItem
-          checked={hasTag(MRF_TAGS.STRIP_MEDIA)}
-          onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.STRIP_MEDIA, checked)}
-          disabled={toggleTagMutation.isPending}
-        >
-          Remove media from posts
-        </DropdownMenuCheckboxItem>
-        
-        <DropdownMenuCheckboxItem
-          checked={hasTag(MRF_TAGS.FORCE_UNLISTED)}
-          onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.FORCE_UNLISTED, checked)}
-          disabled={toggleTagMutation.isPending}
-        >
-          Force posts to be unlisted
-        </DropdownMenuCheckboxItem>
-        
-        <DropdownMenuCheckboxItem
-          checked={hasTag(MRF_TAGS.SANDBOX)}
-          onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.SANDBOX, checked)}
-          disabled={toggleTagMutation.isPending}
-        >
-          Force posts to be followers-only
-        </DropdownMenuCheckboxItem>
+
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>MRF Tags</DropdownMenuLabel>
+          
+          <DropdownMenuCheckboxItem
+            checked={hasTag(MRF_TAGS.FORCE_NSFW)}
+            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.FORCE_NSFW, checked)}
+            disabled={toggleTagMutation.isPending}
+          >
+            Mark all posts as NSFW
+          </DropdownMenuCheckboxItem>
+          
+          <DropdownMenuCheckboxItem
+            checked={hasTag(MRF_TAGS.STRIP_MEDIA)}
+            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.STRIP_MEDIA, checked)}
+            disabled={toggleTagMutation.isPending}
+          >
+            Remove media from posts
+          </DropdownMenuCheckboxItem>
+          
+          <DropdownMenuCheckboxItem
+            checked={hasTag(MRF_TAGS.FORCE_UNLISTED)}
+            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.FORCE_UNLISTED, checked)}
+            disabled={toggleTagMutation.isPending}
+          >
+            Force posts to be unlisted
+          </DropdownMenuCheckboxItem>
+          
+          <DropdownMenuCheckboxItem
+            checked={hasTag(MRF_TAGS.SANDBOX)}
+            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.SANDBOX, checked)}
+            disabled={toggleTagMutation.isPending}
+          >
+            Force posts to be followers-only
+          </DropdownMenuCheckboxItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )
