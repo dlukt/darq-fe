@@ -90,12 +90,12 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger render={
         <Button variant="outline" size="icon">
           <ShieldAlert className="h-4 w-4" />
           <span className="sr-only">Moderation actions</span>
         </Button>
-      </DropdownMenuTrigger>
+      } />
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Moderation</DropdownMenuLabel>

@@ -47,10 +47,11 @@ export function ProfileActions({ user }: { user: User }) {
       >
         {relationship?.muting ? <><Volume2 /> Unmute</> : <><VolumeX /> Mute</>}
       </Button>
-      <Button variant="outline" asChild>
-        <Link to={`/?compose=true&mention=${user.acct}`}>
-          <AtSign /> Mention
-        </Link>
+      <Button 
+        variant="outline" 
+        render={<Link to={`/?compose=true&mention=${user.acct}`} />}
+      >
+        <AtSign /> Mention
       </Button>
       {isAdminOrMod && <ModerationMenu user={user} />}
     </div>
