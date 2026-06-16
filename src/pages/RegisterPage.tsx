@@ -112,7 +112,7 @@ export function RegisterPage() {
             <CardDescription>{successMessage}</CardDescription>
           </CardHeader>
           <CardFooter>
-            <Button className="w-full" render={<Link to="/login" />}>
+            <Button className="w-full" render={<Link to="/login" />} nativeButton={false}>
               Go to Login
             </Button>
           </CardFooter>

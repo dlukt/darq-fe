@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchRelationship, muteUser, unmuteUser, followUser, unfollowUser } from '@/api/endpoints'
 import { ModerationMenu } from '@/components/ModerationMenu'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { UserPlus, UserMinus, VolumeX, Volume2, AtSign } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth'
@@ -47,12 +47,12 @@ export function ProfileActions({ user }: { user: User }) {
       >
         {relationship?.muting ? <><Volume2 /> Unmute</> : <><VolumeX /> Mute</>}
       </Button>
-      <Button 
-        variant="outline" 
-        render={<Link to={`/?compose=true&mention=${user.acct}`} />}
+      <Link 
+        to={`/?compose=true&mention=${user.acct}`}
+        className={buttonVariants({ variant: "outline" })}
       >
         <AtSign /> Mention
-      </Button>
+      </Link>
       {isAdminOrMod && <ModerationMenu user={user} />}
     </div>
   )

@@ -76,7 +76,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
         <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card">
           <p className="text-lg font-semibold mb-2">You must be logged in</p>
           <p className="text-muted-foreground mb-6">Log in to view your personalized home feed.</p>
-          <Button render={<Link to="/login" />}>
+          <Button render={<Link to="/login" />} nativeButton={false}>
             Log In
           </Button>
         </div>
