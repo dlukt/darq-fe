@@ -32,7 +32,7 @@ export function UserPopover({ user, children }: UserPopoverProps) {
 
   return (
     <Popover>
-      <PopoverTrigger render={React.isValidElement(children) ? children : <span className="inline-block">{children}</span>} />
+      <PopoverTrigger nativeButton={false} render={React.isValidElement(children) ? children : <span className="inline-block">{children}</span>} />
       <PopoverContent className="w-96 p-0 overflow-hidden" side="right" align="start">
         <div className="h-24 w-full bg-muted">
           {user.header && <img src={user.header} alt="" className="h-full w-full object-cover" />}
