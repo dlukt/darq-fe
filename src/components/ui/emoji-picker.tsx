@@ -24,7 +24,7 @@ export function EmojiPicker({ children, onEmojiSelect, closeOnSelect = false, al
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger nativeButton={false} render={children as React.ReactElement} />
+      <PopoverTrigger render={children as React.ReactElement} />
       <PopoverContent 
         className="w-[320px] min-w-[320px] h-[300px] min-h-[250px] p-2 flex flex-col resize-y overflow-hidden shadow-lg" 
         align={align}
