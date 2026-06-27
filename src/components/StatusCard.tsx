@@ -15,7 +15,7 @@ import { UserPopover } from "@/components/UserPopover"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/store/auth"
-import { deleteStatus, toggleMuteConversation } from "@/api/endpoints"
+import { deleteStatus, toggleMuteConversation, fetchStatusSource } from "@/api/endpoints"
 import { useSettingsStore } from "@/store/settings"
 
 import { 
@@ -165,6 +165,22 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
   const [selectedChoices, setSelectedChoices] = useState<number[]>([])
   const [isReplying, setIsReplying] = useState(false)
   const [isQuoting, setIsQuoting] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editContent, setEditContent] = useState("")
+
+  const editSourceMutation = useMutation({
+    mutationFn: () => fetchStatusSource(status.id),
+    onSuccess: (data) => {
+      setEditContent(data.text)
+      setIsEditing(true)
+    },
+    onError: () => {
+      // Fallback if the endpoint is not supported by the instance
+      const doc = new DOMParser().parseFromString(status.content, 'text/html');
+      setEditContent(doc.body.textContent || "");
+      setIsEditing(true)
+    }
+  })
 
   const voteMutation = useMutation({
     mutationFn: () => voteOnPoll(poll!.id, selectedChoices),
@@ -686,6 +702,14 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
+            {canDelete && user?.id === account.id && (
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
+                editSourceMutation.mutate()
+              }} disabled={editSourceMutation.isPending}>
+                {editSourceMutation.isPending ? "Loading edit..." : "Edit post"}
+              </DropdownMenuItem>
+            )}
             {canDelete && (
               <DropdownMenuItem 
                 className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
@@ -726,6 +750,17 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
         <StatusComposer 
           quoteId={status.id} 
           onSuccess={() => setIsQuoting(false)}
+          className="mb-0 border-l-4 border-l-primary/30"
+        />
+      </div>
+    )}
+
+    {isEditing && (
+      <div className="mt-2 pl-4 md:pl-12">
+        <StatusComposer
+          editId={status.id}
+          initialContent={editContent}
+          onSuccess={() => setIsEditing(false)}
           className="mb-0 border-l-4 border-l-primary/30"
         />
       </div>
