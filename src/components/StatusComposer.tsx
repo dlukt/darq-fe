@@ -1,6 +1,6 @@
 import { useState, useRef } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { fetchInstanceConfig, postStatus, uploadMedia, type PostStatusPayload } from "@/api/endpoints"
+import { fetchInstanceConfig, postStatus, editStatus, uploadMedia, type PostStatusPayload } from "@/api/endpoints"
 import { useAuthStore } from "@/store/auth"
 import { useForm, Controller, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -62,6 +62,7 @@ const languages = iso6391.getAllCodes().map(code => ({
 }))
 
 export interface StatusComposerProps {
+  editId?: string;
   inReplyToId?: string;
   quoteId?: string;
   initialContent?: string;
@@ -69,7 +70,7 @@ export interface StatusComposerProps {
   className?: string;
 }
 
-export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSuccess, className = "mb-6" }: StatusComposerProps = {}) {
+export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = "", onSuccess, className = "mb-6" }: StatusComposerProps = {}) {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const defaultLanguage = useSettingsStore(state => state.defaultLanguage)
@@ -122,7 +123,12 @@ export function StatusComposer({ inReplyToId, quoteId, initialContent = "", onSu
   const isEmpty = currentContent.trim().length === 0 && attachments.length === 0
 
   const submitMutation = useMutation({
-    mutationFn: postStatus,
+    mutationFn: (payload: PostStatusPayload) => {
+      if (editId) {
+        return editStatus(editId, payload)
+      }
+      return postStatus(payload)
+    },
     onSuccess: () => {
       form.reset({ content: initialContent })
       setAttachments([])

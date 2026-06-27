@@ -19,6 +19,7 @@ export const ENDPOINTS = {
   statuses: {
     post: '/api/v1/statuses',
     single: (id: string) => `/api/v1/statuses/${id}`,
+    source: (id: string) => `/api/v1/statuses/${id}/source`,
     context: (id: string) => `/api/v1/statuses/${id}/context`,
     reply: () => `/api/v1/statuses`,
     quote: () => `/api/v1/statuses`,
@@ -84,6 +85,18 @@ export async function postStatus(payload: PostStatusPayload) {
 
   return apiClient(ENDPOINTS.statuses.post, {
     method: 'POST',
+    body: JSON.stringify(cleanPayload)
+  })
+}
+
+export async function editStatus(id: string, payload: PostStatusPayload) {
+  const cleanPayload = Object.fromEntries(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Object.entries(payload).filter(([_, v]) => v !== "" && v !== undefined && v !== null)
+  )
+
+  return apiClient(ENDPOINTS.statuses.single(id), {
+    method: 'PUT',
     body: JSON.stringify(cleanPayload)
   })
 }
@@ -178,6 +191,10 @@ export async function voteOnPoll(pollId: string, choices: number[]) {
 
 export async function fetchStatus(id: string) {
   return apiClient<Status>(ENDPOINTS.statuses.single(id))
+}
+
+export async function fetchStatusSource(id: string) {
+  return apiClient<{ id: string; text: string; spoiler_text: string }>(ENDPOINTS.statuses.source(id))
 }
 
 export interface StatusContext {
