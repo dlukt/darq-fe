@@ -26,6 +26,7 @@ import { Label } from '@/components/ui/label'
 import { StatusCard } from '@/components/StatusCard'
 import { UserPopover } from '@/components/UserPopover'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 'replies' | 'media' | 'favorites' }) {
   const { data: pinnedStatuses, isLoading: isPinnedLoading } = useQuery({
@@ -294,6 +295,8 @@ export function ProfilePage() {
   // React Router v7 doesn't support partial dynamic segments like `/@:username`, 
   // so we use `/:handle` and strip the leading `@` here if it exists.
   const username = handle?.startsWith('@') ? handle.slice(1) : handle
+
+  useDocumentTitle(username ? `@${username}` : 'Profile')
 
   // First, lookup the account by username/acct to get the ID
   const { data: accountLookup, isLoading: isLookupLoading } = useQuery({

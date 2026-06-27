@@ -57,7 +57,7 @@ export async function verifyCredentials() {
 }
 
 export async function fetchInstanceConfig() {
-  return apiClient<{max_toot_chars?: number}>(ENDPOINTS.instance)
+  return apiClient<{max_toot_chars?: number, title?: string}>(ENDPOINTS.instance)
 }
 
 export interface PostStatusPayload {

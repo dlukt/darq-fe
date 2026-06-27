@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react"
 import { fetchStatus, fetchStatusContext } from "@/api/endpoints"
 import { StatusCard } from "@/components/StatusCard"
 import { Button } from "@/components/ui/button"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 export function StatusPage() {
   const { id } = useParams<{ id: string }>()
@@ -33,6 +34,8 @@ export function StatusPage() {
     queryFn: () => fetchStatusContext(id!),
     enabled: !!id,
   })
+
+  useDocumentTitle(status ? `Post by @${status.account.acct}` : 'Post')
 
   if (isStatusLoading) {
     return (

@@ -2,12 +2,15 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Link } from "react-router"
 import { fetchLists, createList, deleteList, type List } from "@/api/endpoints"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash, Loader2 } from "lucide-react"
 
 export function ListsPage() {
+  useDocumentTitle('Lists')
+
   const queryClient = useQueryClient()
   const [newListName, setNewListName] = useState("")
   const [exclusive, setExclusive] = useState(false)
