@@ -11,8 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 
 import { ensureAppRegistered } from "@/api/auth"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 export function LoginPage() {
+  useDocumentTitle('Login')
+
   const navigate = useNavigate()
   const { setToken, setUser } = useAuthStore()
 

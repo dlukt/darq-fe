@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import { fetchInstanceConfig, fetchNodeInfo, fetchTOS, lookupAccount } from '@/api/endpoints'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -52,6 +53,8 @@ function StaffMemberCard({ username }: { username: string }) {
 }
 
 export default function AboutPage() {
+  useDocumentTitle('About')
+
   const { data: instance, isLoading: isInstanceLoading } = useQuery({
     queryKey: ['instanceConfig'],
     queryFn: fetchInstanceConfig,

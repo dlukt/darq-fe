@@ -7,6 +7,7 @@ import { StatusComposer } from "@/components/StatusComposer"
 import { ListAccounts } from "@/components/ListAccounts"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 interface TimelinePageProps {
   type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list" | "tag"
@@ -62,6 +63,8 @@ export function TimelinePage({ type }: TimelinePageProps) {
   })
 
   const displayTitle = type === "list" && listData ? listData.title : title
+
+  useDocumentTitle(displayTitle)
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">

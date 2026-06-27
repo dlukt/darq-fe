@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import iso6391 from "iso-639-1"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 const languages = iso6391.getAllCodes().map(code => ({
   value: code,
@@ -15,6 +16,8 @@ const languages = iso6391.getAllCodes().map(code => ({
 }))
 
 export function SettingsPage() {
+  useDocumentTitle('Settings')
+
   const { showSensitiveMedia, expandContentWarnings, defaultLanguage, setShowSensitiveMedia, setExpandContentWarnings, setDefaultLanguage } = useSettingsStore()
   const { theme, setTheme } = useTheme()
 

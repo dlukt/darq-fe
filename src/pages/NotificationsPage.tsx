@@ -6,8 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, CheckCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/hooks/useNotifications"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 export default function NotificationsPage() {
+  useDocumentTitle('Notifications')
+
   const queryClient = useQueryClient()
   const { data: notifications, isLoading, refetch } = useNotifications()
   const [isMarkingRead, setIsMarkingRead] = useState(false)
