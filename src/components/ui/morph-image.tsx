@@ -68,7 +68,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
             {...(props as unknown as React.ComponentProps<"video">)}
         />
     ) : (
-        <img
+        <motion.img
             src={src}
             alt={alt}
             className={cn(

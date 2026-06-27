@@ -295,7 +295,7 @@ export async function fetchTOS() {
 }
 
 export async function lookupAccount(username: string) {
-  return apiClient<Account>(`/api/v1/accounts/lookup`, { params: { acct: username } })
+  return apiClient<User>(`/api/v1/accounts/lookup`, { params: { acct: username } })
 }
 
 export async function markNotificationsAsRead(maxId?: string) {
@@ -335,11 +335,11 @@ export async function fetchFavorites(params?: Record<string, string | number | b
 }
 
 export async function followUser(id: string) {
-  return apiClient.post(`/api/v1/accounts/${id}/follow`)
+  return apiClient(`/api/v1/accounts/${id}/follow`, { method: 'POST' })
 }
 
 export async function unfollowUser(id: string) {
-  return apiClient.post(`/api/v1/accounts/${id}/unfollow`)
+  return apiClient(`/api/v1/accounts/${id}/unfollow`, { method: 'POST' })
 }
 
 export async function fetchFollowedTags() {
@@ -347,26 +347,29 @@ export async function fetchFollowedTags() {
 }
 
 export async function followTag(name: string) {
-  return apiClient.post(`/api/v1/tags/${name}/follow`)
+  return apiClient(`/api/v1/tags/${name}/follow`, { method: 'POST' })
 }
 
 export async function unfollowTag(name: string) {
-  return apiClient.post(`/api/v1/tags/${name}/unfollow`)
+  return apiClient(`/api/v1/tags/${name}/unfollow`, { method: 'POST' })
 }
 
 export async function muteUser(id: string) {
-  return apiClient.post(`/api/v1/accounts/${id}/mute`)
+  return apiClient(`/api/v1/accounts/${id}/mute`, { method: 'POST' })
 }
 
 export async function unmuteUser(id: string) {
-  return apiClient.post(`/api/v1/accounts/${id}/unmute`)
+  return apiClient(`/api/v1/accounts/${id}/unmute`, { method: 'POST' })
 }
 
 // Moderation Endpoints
 export async function tagUser(nickname: string, tag: string) {
-  return apiClient.put(`/api/v1/pleroma/admin/users/tag`, {
-    nicknames: [nickname],
-    tags: [tag]
+  return apiClient(`/api/v1/pleroma/admin/users/tag`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      nicknames: [nickname],
+      tags: [tag]
+    })
   })
 }
 
@@ -395,19 +398,21 @@ export async function untagUser(nickname: string, tag: string) {
 }
 
 export async function deactivateUser(nickname: string) {
-  return apiClient.patch(`/api/v1/pleroma/admin/users/deactivate`, {
-    nicknames: [nickname]
+  return apiClient(`/api/v1/pleroma/admin/users/deactivate`, {
+    method: 'PATCH',
+    body: JSON.stringify({ nicknames: [nickname] })
   })
 }
 
 export async function activateUser(nickname: string) {
-  return apiClient.patch(`/api/v1/pleroma/admin/users/activate`, {
-    nicknames: [nickname]
+  return apiClient(`/api/v1/pleroma/admin/users/activate`, {
+    method: 'PATCH',
+    body: JSON.stringify({ nicknames: [nickname] })
   })
 }
 
 export async function deleteAdminUser(nickname: string) {
-  return apiClient.delete(`/api/v1/pleroma/admin/users?nickname=${nickname}`)
+  return apiClient(`/api/v1/pleroma/admin/users?nickname=${nickname}`, { method: 'DELETE' })
 }
 
 export interface Relationship {

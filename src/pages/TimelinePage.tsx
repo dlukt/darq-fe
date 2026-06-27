@@ -33,7 +33,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } = useInfiniteQuery({
     queryKey: ["timeline", type, id],
     queryFn: ({ pageParam }) => {
-      const params = pageParam ? { max_id: pageParam as string } : {}
+      const params: Record<string, string | number | boolean> = pageParam ? { max_id: pageParam as string } : {}
       switch (type) {
         case "home": return fetchHomeTimeline(params)
         case "local": return fetchLocalTimeline(params)
@@ -112,7 +112,7 @@ export function TimelinePage({ type }: TimelinePageProps) {
             }}
             useWindowScroll
             overscan={1000}
-            itemContent={(index, status) => (
+            itemContent={(_index, status) => (
               <div className="pb-2">
                 <StatusCard key={status.id} status={status} />
               </div>

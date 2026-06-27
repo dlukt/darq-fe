@@ -84,7 +84,7 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
         }}
         useWindowScroll
         overscan={1000}
-        itemContent={(index, status) => {
+        itemContent={(_index, status) => {
           if ('isPinned' in status && status.isPinned) {
             return (
               <div key={`pinned-${status.id}`} className="relative pb-2">
@@ -120,7 +120,7 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, error } = useInfiniteQuery({
     queryKey: ['userFollowList', userId, type],
     queryFn: ({ pageParam }) => {
-      const params = pageParam ? { max_id: pageParam as string } : {}
+      const params: Record<string, string | number | boolean> = pageParam ? { max_id: pageParam as string } : {}
       return type === 'following' ? fetchUserFollowing(userId, params) : fetchUserFollowers(userId, params)
     },
     getNextPageParam: (lastPage) => {
@@ -153,7 +153,7 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
         }}
         useWindowScroll
         overscan={1000}
-        itemContent={(index, u) => (
+        itemContent={(_index, u) => (
           <div className="pb-4">
             <UserPopover key={u.id} user={u}>
               <div className="flex items-center space-x-4 p-4 border rounded-lg bg-card cursor-pointer hover:bg-muted/50 transition-colors text-left w-full relative">

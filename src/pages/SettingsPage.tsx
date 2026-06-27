@@ -83,7 +83,12 @@ export function SettingsPage() {
                     The default language selected when composing a new post.
                   </span>
                 </div>
-                <Select value={defaultLanguage} onValueChange={setDefaultLanguage}>
+                <Select
+                  value={defaultLanguage}
+                  onValueChange={(value) => {
+                    if (value !== null) setDefaultLanguage(value)
+                  }}
+                >
                   <SelectTrigger id="default-language" className="w-[180px]">
                     <span className="truncate">
                       {languages.find(l => l.value === defaultLanguage)?.label || "Select language"}
