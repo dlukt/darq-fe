@@ -77,25 +77,25 @@ export interface PostStatusPayload {
   quote_id?: string
 }
 
-export async function postStatus(payload: PostStatusPayload) {
+export async function postStatus(payload: PostStatusPayload): Promise<Status> {
   const cleanPayload = Object.fromEntries(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(payload).filter(([_, v]) => v !== "" && v !== undefined && v !== null)
   )
 
-  return apiClient(ENDPOINTS.statuses.post, {
+  return apiClient<Status>(ENDPOINTS.statuses.post, {
     method: 'POST',
     body: JSON.stringify(cleanPayload)
   })
 }
 
-export async function editStatus(id: string, payload: PostStatusPayload) {
+export async function editStatus(id: string, payload: PostStatusPayload): Promise<Status> {
   const cleanPayload = Object.fromEntries(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(payload).filter(([_, v]) => v !== "" && v !== undefined && v !== null)
   )
 
-  return apiClient(ENDPOINTS.statuses.single(id), {
+  return apiClient<Status>(ENDPOINTS.statuses.single(id), {
     method: 'PUT',
     body: JSON.stringify(cleanPayload)
   })

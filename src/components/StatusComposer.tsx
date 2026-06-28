@@ -2,6 +2,7 @@ import { useState, useRef } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { fetchInstanceConfig, postStatus, editStatus, uploadMedia, type PostStatusPayload } from "@/api/endpoints"
 import { useAuthStore } from "@/store/auth"
+import { type Status } from "@/components/StatusCard"
 import { useForm, Controller, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -66,7 +67,7 @@ export interface StatusComposerProps {
   inReplyToId?: string;
   quoteId?: string;
   initialContent?: string;
-  onSuccess?: () => void;
+  onSuccess?: (status?: Status) => void;
   className?: string;
 }
 
@@ -129,11 +130,11 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
       }
       return postStatus(payload)
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       form.reset({ content: initialContent })
       setAttachments([])
       queryClient.invalidateQueries({ queryKey: ["timeline"] })
-      if (onSuccess) onSuccess()
+      if (onSuccess) onSuccess(data)
     },
     onError: (err) => {
       console.error("Failed to post status", err)

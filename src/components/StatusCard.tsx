@@ -118,7 +118,16 @@ interface StatusCardProps {
   isDescendant?: boolean
 }
 
-export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: StatusCardProps) {
+export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDescendant }: StatusCardProps) {
+  const [prevInitialStatus, setPrevInitialStatus] = useState(initialStatus)
+  const [optimisticStatus, setOptimisticStatus] = useState<Status | null>(null)
+
+  if (initialStatus !== prevInitialStatus) {
+    setPrevInitialStatus(initialStatus)
+    setOptimisticStatus(null)
+  }
+
+  const status = optimisticStatus || initialStatus
   const {
     account,
     content,
@@ -760,7 +769,12 @@ export function StatusCard({ status, isDetailed, isAncestor, isDescendant }: Sta
         <StatusComposer
           editId={status.id}
           initialContent={editContent}
-          onSuccess={() => setIsEditing(false)}
+          onSuccess={(updatedStatus) => {
+            if (updatedStatus) {
+              setOptimisticStatus(updatedStatus)
+            }
+            setIsEditing(false)
+          }}
           className="mb-0 border-l-4 border-l-primary/30"
         />
       </div>
