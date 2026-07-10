@@ -622,6 +622,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           size="sm" 
           className={`gap-1.5 hover:text-foreground ${isReplying ? "text-foreground bg-muted" : "text-muted-foreground"}`}
           onClick={() => setIsReplying(!isReplying)}
+          title="Reply"
+          aria-label="Reply"
         >
           <MessageCircle className="h-4 w-4" />
           {replies_count > 0 && <span className="text-xs">{replies_count}</span>}
@@ -632,6 +634,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           className={`gap-1.5 hover:text-green-500 ${reblogged ? "text-green-500" : "text-muted-foreground"}`}
           onClick={() => reblogMutation.mutate()}
           disabled={reblogMutation.isPending}
+          title={reblogged ? "Undo repeat" : "Repeat"}
+          aria-label={reblogged ? "Undo repeat" : "Repeat"}
         >
           <Repeat className={`h-4 w-4 ${reblogMutation.isPending ? "animate-spin" : ""}`} />
           {reblogs_count > 0 && <span className="text-xs">{reblogs_count}</span>}
@@ -641,6 +645,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           size="sm" 
           className={`gap-1.5 hover:text-foreground ${isQuoting ? "text-foreground bg-muted" : "text-muted-foreground"}`}
           onClick={() => setIsQuoting(!isQuoting)}
+          title="Quote"
+          aria-label="Quote"
         >
           <Quote className="h-4 w-4" />
         </Button>
@@ -650,12 +656,14 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           className={`gap-1.5 hover:text-pink-500 ${favourited ? "text-pink-500 fill-current" : "text-muted-foreground"}`}
           onClick={() => favouriteMutation.mutate()}
           disabled={favouriteMutation.isPending}
+          title={favourited ? "Undo favourite" : "Favourite"}
+          aria-label={favourited ? "Undo favourite" : "Favourite"}
         >
           <Heart className={`h-4 w-4 ${favourited ? "fill-current" : ""} ${favouriteMutation.isPending ? "animate-pulse" : ""}`} />
           {favourites_count > 0 && <span className="text-xs">{favourites_count}</span>}
         </Button>
         <EmojiPicker onEmojiSelect={handleReaction} closeOnSelect={true}>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" title="Add reaction" aria-label="Add reaction">
             <SmilePlus className={`h-4 w-4 ${reactionMutation.isPending ? "animate-pulse" : ""}`} />
           </Button>
         </EmojiPicker>
@@ -665,6 +673,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           className={`gap-1.5 hover:text-primary ${bookmarked ? "text-primary" : "text-muted-foreground"}`}
           onClick={() => bookmarkMutation.mutate()}
           disabled={bookmarkMutation.isPending}
+          title={bookmarked ? "Remove bookmark" : "Bookmark"}
+          aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
         >
           <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
         </Button>
@@ -673,6 +683,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           <DropdownMenuTrigger 
             className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent h-8 w-8 text-muted-foreground hover:text-foreground"
             onClick={(e) => e.stopPropagation()}
+            title="More options"
+            aria-label="More options"
           >
             <MoreHorizontal className="h-4 w-4" />
           </DropdownMenuTrigger>
