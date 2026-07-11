@@ -241,6 +241,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
           type="button"
           variant="ghost" 
           size="icon" 
+          aria-label={label}
           className={`h-8 w-8 ${currentVisibility === value ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
           onClick={() => setValue("visibility", value)}
         >
@@ -318,6 +319,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                       type="button"
                       variant="destructive" 
                       size="icon" 
+                      aria-label="Remove attachment"
                       className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity scale-90"
                       onClick={() => removeAttachment(att.file)}
                     >
@@ -350,6 +352,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                           type="button" 
                           variant="ghost" 
                           size="icon" 
+                          aria-label="Remove option"
                           onClick={() => removePollOption(i)}
                           className="shrink-0 text-muted-foreground hover:text-destructive"
                         >
@@ -430,6 +433,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                         type="button"
                         variant="ghost" 
                         size="icon" 
+                        aria-label="Local Only (Do not federate)"
                         className={`h-8 w-8 ${currentLocalOnly ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
                         onClick={() => setValue("localOnly", !currentLocalOnly)}
                       >
@@ -500,7 +504,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                   />
                   <Tooltip>
                     <TooltipTrigger render={
-                      <Button type="button" variant="ghost" size="icon" className="text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
+                      <Button type="button" variant="ghost" size="icon" aria-label="Upload Media" className="text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
                         <Upload className="h-5 w-5" />
                       </Button>
                     } />
@@ -508,7 +512,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                   </Tooltip>
 
                   <EmojiPicker onEmojiSelect={handleEmojiClick} closeOnSelect={false}>
-                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground" title="Insert Emoji">
+                    <Button type="button" variant="ghost" size="icon" aria-label="Insert Emoji" className="text-muted-foreground" title="Insert Emoji">
                       <Smile className="h-5 w-5" />
                     </Button>
                   </EmojiPicker>
@@ -519,6 +523,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                         type="button"
                         variant="ghost" 
                         size="icon" 
+                        aria-label="Add Poll"
                         className={`text-muted-foreground ${currentPollShow ? 'bg-muted' : ''}`}
                         onClick={() => setValue("poll.show", !currentPollShow)}
                       >
@@ -534,6 +539,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                         type="button"
                         variant="ghost" 
                         size="icon" 
+                        aria-label="Toggle Content Warning"
                         className={`text-muted-foreground ${showCW ? 'bg-muted' : ''}`}
                         onClick={() => setValue("showCW", !showCW)}
                       >
