@@ -133,6 +133,7 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                       disabled={removeMutation.isPending}
                       onClick={() => removeMutation.mutate(user.id)}
                       title="Remove from list"
+                      aria-label="Remove from list"
                     >
                       {removeMutation.isPending && removeMutation.variables === user.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
