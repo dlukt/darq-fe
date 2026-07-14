@@ -88,6 +88,8 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                       size="sm"
                       disabled={isAccountInList(user.id) || addMutation.isPending}
                       onClick={() => addMutation.mutate(user.id)}
+                      aria-label={isAccountInList(user.id) ? `Already added ${user.display_name || user.username}` : `Add ${user.display_name || user.username} to list`}
+                      title={isAccountInList(user.id) ? "Already added" : "Add to list"}
                     >
                       {addMutation.isPending && addMutation.variables === user.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
