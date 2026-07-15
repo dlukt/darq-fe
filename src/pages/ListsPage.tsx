@@ -104,6 +104,7 @@ export function ListsPage() {
                 }
               }}
               title="Delete List"
+              aria-label="Delete list"
             >
               <Trash className="h-4 w-4" />
             </Button>

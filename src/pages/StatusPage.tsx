@@ -62,7 +62,7 @@ export function StatusPage() {
   return (
     <div className="flex flex-col w-full max-w-2xl mx-auto pb-20 pt-4">
       <div className="mb-4 flex items-center px-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back" title="Go back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="ml-2 text-lg font-bold">Thread</h1>
