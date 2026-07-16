@@ -736,7 +736,9 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                 className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
                 onClick={(e) => {
                   e.stopPropagation()
-                  deleteMutation.mutate()
+                  if (window.confirm("Are you sure you want to delete this post?")) {
+                    deleteMutation.mutate()
+                  }
                 }}
               >
                 Delete post
