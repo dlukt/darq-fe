@@ -14,6 +14,7 @@ import { StatusComposer } from "@/components/StatusComposer"
 import { UserPopover } from "@/components/UserPopover"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuthStore } from "@/store/auth"
 import { deleteStatus, toggleMuteConversation, fetchStatusSource } from "@/api/endpoints"
 import { useSettingsStore } from "@/store/settings"
@@ -172,6 +173,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
     return true
   })
   const [selectedChoices, setSelectedChoices] = useState<number[]>([])
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isReplying, setIsReplying] = useState(false)
   const [isQuoting, setIsQuoting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -736,7 +738,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                 className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
                 onClick={(e) => {
                   e.stopPropagation()
-                  deleteMutation.mutate()
+                  setShowDeleteConfirm(true)
                 }}
               >
                 Delete post
@@ -791,6 +793,34 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
         />
       </div>
     )}
+
+      {showDeleteConfirm && (
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Delete post?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this post? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={deleteMutation.isPending}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  deleteMutation.mutate()
+                  setShowDeleteConfirm(false)
+                }}
+                disabled={deleteMutation.isPending}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
