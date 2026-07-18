@@ -18,7 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectScrollUpButton, SelectScrollDownButton } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useSettingsStore } from "@/store/settings"
-import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus, Quote } from "lucide-react"
+import { Mail, Lock, Unlock, Globe, Users, Upload, Smile, BarChart, EyeOff, X, Plus, Quote, Loader2 } from "lucide-react"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 
 type Visibility = "public" | "unlisted" | "private" | "direct"
@@ -559,6 +559,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                     type="submit"
                     disabled={isEmpty || isOverLimit || submitMutation.isPending || isUploading}
                   >
+                    {submitMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {submitMutation.isPending ? "Posting..." : "Post"}
                   </Button>
                 </div>
