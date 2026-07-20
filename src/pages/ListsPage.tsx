@@ -7,21 +7,35 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash, Loader2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export function ListsPage() {
-  useDocumentTitle('Lists')
+  useDocumentTitle("Lists")
 
   const queryClient = useQueryClient()
   const [newListName, setNewListName] = useState("")
   const [exclusive, setExclusive] = useState(false)
+  const [listToDelete, setListToDelete] = useState<List | null>(null)
 
-  const { data: lists, isLoading, isError } = useQuery({
+  const {
+    data: lists,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["lists"],
     queryFn: fetchLists,
   })
 
   const createMutation = useMutation({
-    mutationFn: ({ title, exclusive }: { title: string, exclusive: boolean }) => createList(title, exclusive),
+    mutationFn: ({ title, exclusive }: { title: string; exclusive: boolean }) =>
+      createList(title, exclusive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lists"] })
       setNewListName("")
@@ -44,10 +58,13 @@ export function ListsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-4 px-4">
-      <h1 className="text-3xl font-bold mb-6 tracking-tight">Your Lists</h1>
+    <div className="mx-auto max-w-2xl px-4 py-4">
+      <h1 className="mb-6 text-3xl font-bold tracking-tight">Your Lists</h1>
 
-      <form onSubmit={handleCreateList} className="flex flex-col gap-3 mb-8 bg-card p-4 rounded-lg border">
+      <form
+        onSubmit={handleCreateList}
+        className="mb-8 flex flex-col gap-3 rounded-lg border bg-card p-4"
+      >
         <h2 className="text-lg font-semibold">Create New List</h2>
         <div className="flex gap-2">
           <Input
@@ -57,14 +74,27 @@ export function ListsPage() {
             disabled={createMutation.isPending}
             className="max-w-xs"
           />
-          <Button type="submit" disabled={!newListName.trim() || createMutation.isPending}>
-            {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button
+            type="submit"
+            disabled={!newListName.trim() || createMutation.isPending}
+          >
+            {createMutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Create
           </Button>
         </div>
-        <div className="flex items-center space-x-2 mt-1">
-          <Checkbox id="exclusive" checked={exclusive} onCheckedChange={(c) => setExclusive(c === true)} disabled={createMutation.isPending} />
-          <label htmlFor="exclusive" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+        <div className="mt-1 flex items-center space-x-2">
+          <Checkbox
+            id="exclusive"
+            checked={exclusive}
+            onCheckedChange={(c) => setExclusive(c === true)}
+            disabled={createMutation.isPending}
+          />
+          <label
+            htmlFor="exclusive"
+            className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Remove users on list from home timeline
           </label>
         </div>
@@ -77,21 +107,27 @@ export function ListsPage() {
       )}
 
       {isError && (
-        <div className="p-4 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-md mb-4">
+        <div className="mb-4 rounded-md bg-red-100 p-4 text-red-600 dark:bg-red-900/30">
           Failed to load lists.
         </div>
       )}
 
       {!isLoading && lists?.length === 0 && (
-        <div className="text-center p-8 text-muted-foreground border rounded-md">
+        <div className="rounded-md border p-8 text-center text-muted-foreground">
           You don't have any lists yet.
         </div>
       )}
 
       <div className="flex flex-col gap-3">
         {lists?.map((list: List) => (
-          <div key={list.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
-            <Link to={`/lists/${list.id}`} className="font-medium hover:underline text-lg">
+          <div
+            key={list.id}
+            className="flex items-center justify-between rounded-lg border bg-card p-4"
+          >
+            <Link
+              to={`/lists/${list.id}`}
+              className="text-lg font-medium hover:underline"
+            >
               {list.title}
             </Link>
             <Button
@@ -99,9 +135,7 @@ export function ListsPage() {
               size="icon"
               disabled={deleteMutation.isPending}
               onClick={() => {
-                if (confirm(`Are you sure you want to delete the list "${list.title}"?`)) {
-                  deleteMutation.mutate(list.id)
-                }
+                setListToDelete(list)
               }}
               title="Delete List"
               aria-label="Delete list"
@@ -111,6 +145,42 @@ export function ListsPage() {
           </div>
         ))}
       </div>
+
+      <Dialog
+        open={!!listToDelete}
+        onOpenChange={(open) => !open && setListToDelete(null)}
+      >
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Delete list?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the list "{listToDelete?.title}"?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setListToDelete(null)}
+              disabled={deleteMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (listToDelete) {
+                  deleteMutation.mutate(listToDelete.id, {
+                    onSuccess: () => setListToDelete(null),
+                  })
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

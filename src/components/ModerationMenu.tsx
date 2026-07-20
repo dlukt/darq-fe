@@ -1,7 +1,13 @@
-
+import { useState } from "react"
 import { ShieldAlert } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { tagUser, untagUser, deactivateUser, activateUser, deleteAdminUser } from "@/api/endpoints"
+import {
+  tagUser,
+  untagUser,
+  deactivateUser,
+  activateUser,
+  deleteAdminUser,
+} from "@/api/endpoints"
 import type { User } from "@/store/auth"
 
 import {
@@ -12,9 +18,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-  DropdownMenuGroup
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface ModerationMenuProps {
   user: User
@@ -30,6 +44,7 @@ const MRF_TAGS = {
 export function ModerationMenu({ user }: ModerationMenuProps) {
   const queryClient = useQueryClient()
   const nickname = user.acct
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Helper to check if user has a tag
   const hasTag = (tag: string) => user.pleroma?.tags?.includes(tag) ?? false
@@ -45,8 +60,10 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
     onSuccess: () => {
       // Invalidate both the ID and username lookups just in case
       queryClient.invalidateQueries({ queryKey: ["fetchAccount", user.id] })
-      queryClient.invalidateQueries({ queryKey: ["lookupAccount", user.username] })
-    }
+      queryClient.invalidateQueries({
+        queryKey: ["lookupAccount", user.username],
+      })
+    },
   })
 
   const toggleActivationMutation = useMutation({
@@ -59,8 +76,10 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fetchAccount", user.id] })
-      queryClient.invalidateQueries({ queryKey: ["lookupAccount", user.username] })
-    }
+      queryClient.invalidateQueries({
+        queryKey: ["lookupAccount", user.username],
+      })
+    },
   })
 
   const deleteMutation = useMutation({
@@ -69,7 +88,7 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
     },
     onSuccess: () => {
       window.history.back()
-    }
+    },
   })
 
   const handleToggleTag = (tag: string, checked: boolean) => {
@@ -79,9 +98,7 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
   }
 
   const handleDelete = () => {
-    if (confirm(`Are you sure you want to completely delete the account for @${nickname}? This action is irreversible.`)) {
-      deleteMutation.mutate()
-    }
+    setShowDeleteConfirm(true)
   }
 
   // user.pleroma.is_active might not be explicitly populated, sometimes deactivated users have `is_active: false`
@@ -89,71 +106,114 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
   const isActive = user.pleroma?.is_active ?? true
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={
-        <Button variant="outline" size="icon">
-          <ShieldAlert className="h-4 w-4" />
-          <span className="sr-only">Moderation actions</span>
-        </Button>
-      } />
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Moderation</DropdownMenuLabel>
-          
-          <DropdownMenuItem 
-            onClick={() => toggleActivationMutation.mutate(isActive)}
-            disabled={toggleActivationMutation.isPending}
-          >
-            {isActive ? "Deactivate account" : "Activate account"}
-          </DropdownMenuItem>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="outline" size="icon">
+              <ShieldAlert className="h-4 w-4" />
+              <span className="sr-only">Moderation actions</span>
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Moderation</DropdownMenuLabel>
 
-          <DropdownMenuItem 
-            onClick={handleDelete}
-            className="text-red-500 focus:text-red-500"
-            disabled={deleteMutation.isPending}
-          >
-            Delete account
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        
-        <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => toggleActivationMutation.mutate(isActive)}
+              disabled={toggleActivationMutation.isPending}
+            >
+              {isActive ? "Deactivate account" : "Activate account"}
+            </DropdownMenuItem>
 
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>MRF Tags</DropdownMenuLabel>
-          
-          <DropdownMenuCheckboxItem
-            checked={hasTag(MRF_TAGS.FORCE_NSFW)}
-            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.FORCE_NSFW, checked)}
-            disabled={toggleTagMutation.isPending}
-          >
-            Mark all posts as NSFW
-          </DropdownMenuCheckboxItem>
-          
-          <DropdownMenuCheckboxItem
-            checked={hasTag(MRF_TAGS.STRIP_MEDIA)}
-            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.STRIP_MEDIA, checked)}
-            disabled={toggleTagMutation.isPending}
-          >
-            Remove media from posts
-          </DropdownMenuCheckboxItem>
-          
-          <DropdownMenuCheckboxItem
-            checked={hasTag(MRF_TAGS.FORCE_UNLISTED)}
-            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.FORCE_UNLISTED, checked)}
-            disabled={toggleTagMutation.isPending}
-          >
-            Force posts to be unlisted
-          </DropdownMenuCheckboxItem>
-          
-          <DropdownMenuCheckboxItem
-            checked={hasTag(MRF_TAGS.SANDBOX)}
-            onCheckedChange={(checked) => handleToggleTag(MRF_TAGS.SANDBOX, checked)}
-            disabled={toggleTagMutation.isPending}
-          >
-            Force posts to be followers-only
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <DropdownMenuItem
+              onClick={handleDelete}
+              className="text-red-500 focus:text-red-500"
+              disabled={deleteMutation.isPending}
+            >
+              Delete account
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>MRF Tags</DropdownMenuLabel>
+
+            <DropdownMenuCheckboxItem
+              checked={hasTag(MRF_TAGS.FORCE_NSFW)}
+              onCheckedChange={(checked) =>
+                handleToggleTag(MRF_TAGS.FORCE_NSFW, checked)
+              }
+              disabled={toggleTagMutation.isPending}
+            >
+              Mark all posts as NSFW
+            </DropdownMenuCheckboxItem>
+
+            <DropdownMenuCheckboxItem
+              checked={hasTag(MRF_TAGS.STRIP_MEDIA)}
+              onCheckedChange={(checked) =>
+                handleToggleTag(MRF_TAGS.STRIP_MEDIA, checked)
+              }
+              disabled={toggleTagMutation.isPending}
+            >
+              Remove media from posts
+            </DropdownMenuCheckboxItem>
+
+            <DropdownMenuCheckboxItem
+              checked={hasTag(MRF_TAGS.FORCE_UNLISTED)}
+              onCheckedChange={(checked) =>
+                handleToggleTag(MRF_TAGS.FORCE_UNLISTED, checked)
+              }
+              disabled={toggleTagMutation.isPending}
+            >
+              Force posts to be unlisted
+            </DropdownMenuCheckboxItem>
+
+            <DropdownMenuCheckboxItem
+              checked={hasTag(MRF_TAGS.SANDBOX)}
+              onCheckedChange={(checked) =>
+                handleToggleTag(MRF_TAGS.SANDBOX, checked)
+              }
+              disabled={toggleTagMutation.isPending}
+            >
+              Force posts to be followers-only
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Delete account?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to completely delete the account for @
+              {nickname}? This action is irreversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deleteMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                deleteMutation.mutate()
+                setShowDeleteConfirm(false)
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
