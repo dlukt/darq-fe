@@ -6,6 +6,16 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Trash, Loader2 } from "lucide-react"
 
 export function ListsPage() {
@@ -94,20 +104,39 @@ export function ListsPage() {
             <Link to={`/lists/${list.id}`} className="font-medium hover:underline text-lg">
               {list.title}
             </Link>
-            <Button
-              variant="destructive"
-              size="icon"
-              disabled={deleteMutation.isPending}
-              onClick={() => {
-                if (confirm(`Are you sure you want to delete the list "${list.title}"?`)) {
-                  deleteMutation.mutate(list.id)
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    disabled={deleteMutation.isPending}
+                    title="Delete List"
+                    aria-label="Delete list"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 }
-              }}
-              title="Delete List"
-              aria-label="Delete list"
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
+              />
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete List</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete the list "{list.title}"? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="mt-4 gap-2 sm:gap-0">
+                  <DialogClose render={<Button variant="outline">Cancel</Button>} />
+                  <Button
+                    variant="destructive"
+                    onClick={() => deleteMutation.mutate(list.id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         ))}
       </div>
