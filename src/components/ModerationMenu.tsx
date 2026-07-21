@@ -1,4 +1,5 @@
 
+import { useState } from "react"
 import { ShieldAlert } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { tagUser, untagUser, deactivateUser, activateUser, deleteAdminUser } from "@/api/endpoints"
@@ -15,6 +16,7 @@ import {
   DropdownMenuGroup
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface ModerationMenuProps {
   user: User
@@ -29,6 +31,7 @@ const MRF_TAGS = {
 
 export function ModerationMenu({ user }: ModerationMenuProps) {
   const queryClient = useQueryClient()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const nickname = user.acct
 
   // Helper to check if user has a tag
@@ -78,10 +81,10 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
     toggleTagMutation.mutate({ tag, active: checked })
   }
 
-  const handleDelete = () => {
-    if (confirm(`Are you sure you want to completely delete the account for @${nickname}? This action is irreversible.`)) {
-      deleteMutation.mutate()
-    }
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowDeleteConfirm(true)
   }
 
   // user.pleroma.is_active might not be explicitly populated, sometimes deactivated users have `is_active: false`
@@ -89,6 +92,7 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
   const isActive = user.pleroma?.is_active ?? true
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger render={
         <Button variant="outline" size="icon">
@@ -155,5 +159,34 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    {showDeleteConfirm && (
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Delete account?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to completely delete the account for @{nickname}? This action is irreversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={deleteMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                deleteMutation.mutate()
+                setShowDeleteConfirm(false)
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )}
+    </>
   )
 }

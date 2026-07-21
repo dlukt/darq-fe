@@ -4,6 +4,7 @@ import { Link } from "react-router"
 import { fetchLists, createList, deleteList, type List } from "@/api/endpoints"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Trash, Loader2 } from "lucide-react"
@@ -14,6 +15,7 @@ export function ListsPage() {
   const queryClient = useQueryClient()
   const [newListName, setNewListName] = useState("")
   const [exclusive, setExclusive] = useState(false)
+  const [listToDelete, setListToDelete] = useState<List | null>(null)
 
   const { data: lists, isLoading, isError } = useQuery({
     queryKey: ["lists"],
@@ -99,9 +101,7 @@ export function ListsPage() {
               size="icon"
               disabled={deleteMutation.isPending}
               onClick={() => {
-                if (confirm(`Are you sure you want to delete the list "${list.title}"?`)) {
-                  deleteMutation.mutate(list.id)
-                }
+                setListToDelete(list)
               }}
               title="Delete List"
               aria-label="Delete list"
@@ -111,6 +111,35 @@ export function ListsPage() {
           </div>
         ))}
       </div>
+    </div>
+
+      {listToDelete && (
+        <Dialog open={!!listToDelete} onOpenChange={(open) => !open && setListToDelete(null)}>
+          <DialogContent showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Delete List?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete the list "{listToDelete.title}"?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setListToDelete(null)} disabled={deleteMutation.isPending}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  deleteMutation.mutate(listToDelete.id)
+                  setListToDelete(null)
+                }}
+                disabled={deleteMutation.isPending}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
