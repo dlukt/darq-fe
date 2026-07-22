@@ -1,3 +1,11 @@
+## 2024-05-18 - [ARIA Labels for Icon Buttons]
+**Learning:** Icon-only buttons often miss `aria-label`, as seen in ListAccounts component, making it hard for screen readers to interpret.
+**Action:** Always add explicit `aria-label` attribute describing the action for all icon-only buttons.
+
+## 2024-05-19 - [Confirmation for Destructive Actions]
+**Learning:** Actions like "Delete post" previously executed immediately without confirmation, causing frustration due to accidental clicks. While native `window.confirm` is easy to implement, it is jarring and inconsistent with the app's UI. Accessible `Dialog` components are preferred.
+**Action:** Always add a confirmation step using a dedicated, accessible UI modal dialog for destructive user actions such as deletions to prevent accidental data loss and maintain a cohesive UX.
+
 ## 2024-07-22 - Replacing native browser dialogs with accessible components
 **Learning:** The native `window.confirm()` or `confirm()` dialog stops JS execution and can be inaccessible to screen readers, while also jarring the user out of the application experience. The UI library's dialog provides a much smoother, integrated, and accessible experience for destructive actions like account deletion.
 **Action:** When working on administrative or settings features that include destructive actions, always check if they are using native dialogs. If so, plan to upgrade them to accessible modal components from the design system.
