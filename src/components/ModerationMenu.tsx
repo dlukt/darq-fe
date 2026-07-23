@@ -1,4 +1,5 @@
 
+import { useState } from "react"
 import { ShieldAlert } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { tagUser, untagUser, deactivateUser, activateUser, deleteAdminUser } from "@/api/endpoints"
@@ -15,6 +16,14 @@ import {
   DropdownMenuGroup
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface ModerationMenuProps {
   user: User
@@ -29,6 +38,7 @@ const MRF_TAGS = {
 
 export function ModerationMenu({ user }: ModerationMenuProps) {
   const queryClient = useQueryClient()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const nickname = user.acct
 
   // Helper to check if user has a tag
@@ -68,6 +78,7 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
       await deleteAdminUser(nickname)
     },
     onSuccess: () => {
+      setShowDeleteDialog(false)
       window.history.back()
     }
   })
@@ -79,9 +90,11 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
   }
 
   const handleDelete = () => {
-    if (confirm(`Are you sure you want to completely delete the account for @${nickname}? This action is irreversible.`)) {
-      deleteMutation.mutate()
-    }
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = () => {
+    deleteMutation.mutate()
   }
 
   // user.pleroma.is_active might not be explicitly populated, sometimes deactivated users have `is_active: false`
@@ -89,6 +102,7 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
   const isActive = user.pleroma?.is_active ?? true
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger render={
         <Button variant="outline" size="icon">
@@ -155,5 +169,25 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Account</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to completely delete the account for @{nickname}? This action is irreversible.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={confirmDelete} disabled={deleteMutation.isPending}>
+            {deleteMutation.isPending ? "Deleting..." : "Delete Account"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
