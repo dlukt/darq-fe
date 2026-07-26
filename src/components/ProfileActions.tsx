@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { fetchRelationship, muteUser, unmuteUser, followUser, unfollowUser } from '@/api/endpoints'
 import { ModerationMenu } from '@/components/ModerationMenu'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { UserPlus, UserMinus, VolumeX, Volume2, AtSign } from 'lucide-react'
+import { UserPlus, UserMinus, VolumeX, Volume2, AtSign, Loader2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth'
 import type { User } from '@/store/auth'
@@ -38,14 +38,16 @@ export function ProfileActions({ user }: { user: User }) {
         onClick={() => followMutation.mutate()}
         disabled={followMutation.isPending || !relationship}
       >
-        {relationship?.following ? <><UserMinus /> Unfollow</> : <><UserPlus /> Follow</>}
+        {followMutation.isPending ? <Loader2 className="animate-spin" /> : relationship?.following ? <UserMinus /> : <UserPlus />}
+        {relationship?.following ? 'Unfollow' : 'Follow'}
       </Button>
       <Button 
         variant={relationship?.muting ? "destructive" : "outline"} 
         onClick={() => muteMutation.mutate()}
         disabled={muteMutation.isPending || !relationship}
       >
-        {relationship?.muting ? <><Volume2 /> Unmute</> : <><VolumeX /> Mute</>}
+        {muteMutation.isPending ? <Loader2 className="animate-spin" /> : relationship?.muting ? <Volume2 /> : <VolumeX />}
+        {relationship?.muting ? 'Unmute' : 'Mute'}
       </Button>
       <Link 
         to={`/?compose=true&mention=${user.acct}`}
