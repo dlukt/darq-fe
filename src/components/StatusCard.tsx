@@ -344,12 +344,23 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
   return (
     <div className={`mb-4 w-full ${isDescendant ? "pl-8 relative before:absolute before:left-4 before:top-0 before:-bottom-8 before:w-0.5 before:bg-border last:before:hidden" : ""}`}>
       <Card 
-        className={`w-full transition-colors ${!isDetailed ? "cursor-pointer hover:bg-muted/20" : ""} ${isAncestor ? "rounded-b-none border-b-0 mb-0" : ""} ${isDescendant ? "rounded-t-none border-t-0 mt-0" : ""}`}
+        role={!isDetailed ? "article" : undefined}
+        tabIndex={!isDetailed ? 0 : undefined}
+        className={`w-full transition-colors ${!isDetailed ? "cursor-pointer hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" : ""} ${isAncestor ? "rounded-b-none border-b-0 mb-0" : ""} ${isDescendant ? "rounded-t-none border-t-0 mt-0" : ""}`}
         onClick={(e) => {
           if (isDetailed) return
           const target = e.target as HTMLElement
           if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
           navigate(`/status/${status.id}`)
+        }}
+        onKeyDown={(e) => {
+          if (isDetailed) return
+          if (e.key === 'Enter' || e.key === ' ') {
+            const target = e.target as HTMLElement
+            if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
+            e.preventDefault()
+            navigate(`/status/${status.id}`)
+          }
         }}
       >
         <CardHeader className="flex flex-row items-center gap-4 pb-2">
@@ -381,6 +392,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
               variant="secondary"
               size="sm"
               onClick={() => setShowContent(!showContent)}
+              aria-expanded={showContent}
             >
               {showContent ? "Show less" : "Show more"}
             </Button>
@@ -393,6 +405,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
               variant="secondary"
               size="sm"
               onClick={() => setShowContent(true)}
+              aria-expanded={showContent}
             >
               Show sensitive content
             </Button>
@@ -428,7 +441,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                     href={card.url} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="block transition-colors hover:bg-muted/50"
+                    className="block transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     {card.image && (
                       <div className="aspect-[1.91/1] w-full bg-muted relative">
