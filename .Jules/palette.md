@@ -9,3 +9,6 @@
 ## 2024-07-22 - Replacing native browser dialogs with accessible components
 **Learning:** The native `window.confirm()` or `confirm()` dialog stops JS execution and can be inaccessible to screen readers, while also jarring the user out of the application experience. The UI library's dialog provides a much smoother, integrated, and accessible experience for destructive actions like account deletion.
 **Action:** When working on administrative or settings features that include destructive actions, always check if they are using native dialogs. If so, plan to upgrade them to accessible modal components from the design system.
+## 2024-03-24 - Interactive Component Accessibility
+**Learning:** Found that entire custom UI cards acting as clickable wrappers (like `StatusCard.tsx` wrapping navigation logic via `onClick`) are completely invisible to keyboard users traversing timelines.
+**Action:** Always ensure interactive container components have a `role` (e.g. `article` or `button`), a `tabIndex={0}`, an `onKeyDown` handler listening to `Enter` and `Space`, and `focus-visible` styles (`focus-visible:ring-2`, etc.). Furthermore, the `onKeyDown` handler must check `e.target` and `closest` interactive children (like links or buttons) to stop propagation and prevent triggering the wrapper action unexpectedly.
