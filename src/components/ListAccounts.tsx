@@ -15,6 +15,7 @@ export function ListAccounts({ listId }: ListAccountsProps) {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
   const [followingOnly, setFollowingOnly] = useState(false)
+  const [accountToRemove, setAccountToRemove] = useState<string | null>(null)
 
   const { data: accounts, isLoading: accountsLoading } = useQuery({
     queryKey: ["listAccounts", listId],
@@ -38,6 +39,7 @@ export function ListAccounts({ listId }: ListAccountsProps) {
     mutationFn: (accountId: string) => removeAccountsFromList(listId, [accountId]),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listAccounts", listId] })
+      setAccountToRemove(null)
     },
   })
 
@@ -129,20 +131,41 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                         <p className="text-xs text-muted-foreground truncate">@{user.acct}</p>
                       </div>
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      disabled={removeMutation.isPending}
-                      onClick={() => removeMutation.mutate(user.id)}
-                      title="Remove from list"
-                      aria-label="Remove from list"
-                    >
-                      {removeMutation.isPending && removeMutation.variables === user.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <UserMinus className="h-4 w-4" />
-                      )}
-                    </Button>
+                    {accountToRemove === user.id ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setAccountToRemove(null)}
+                          disabled={removeMutation.isPending}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeMutation.mutate(user.id)}
+                          disabled={removeMutation.isPending}
+                        >
+                          {removeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : "Confirm"}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        disabled={removeMutation.isPending}
+                        onClick={() => setAccountToRemove(user.id)}
+                        title="Remove from list"
+                        aria-label="Remove from list"
+                      >
+                        {removeMutation.isPending && removeMutation.variables === user.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <UserMinus className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
