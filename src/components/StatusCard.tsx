@@ -332,7 +332,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
         <Card className="w-full bg-muted/30">
           <CardContent className="p-4 flex items-center justify-between text-sm text-muted-foreground">
             <span>Post hidden</span>
-            <Button variant="ghost" size="sm" onClick={() => setIsHidden(false)}>
+            <Button variant="ghost" size="sm" aria-label="Undo hide post" title="Undo hide post" onClick={() => setIsHidden(false)}>
               Undo
             </Button>
           </CardContent>

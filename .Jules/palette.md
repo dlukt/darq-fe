@@ -12,3 +12,6 @@
 ## 2024-03-24 - Interactive Component Accessibility
 **Learning:** Found that entire custom UI cards acting as clickable wrappers (like `StatusCard.tsx` wrapping navigation logic via `onClick`) are completely invisible to keyboard users traversing timelines.
 **Action:** Always ensure interactive container components have a `role` (e.g. `article` or `button`), a `tabIndex={0}`, an `onKeyDown` handler listening to `Enter` and `Space`, and `focus-visible` styles (`focus-visible:ring-2`, etc.). Furthermore, the `onKeyDown` handler must check `e.target` and `closest` interactive children (like links or buttons) to stop propagation and prevent triggering the wrapper action unexpectedly.
+## 2024-03-24 - Missing ARIA Labels on Icon-only Buttons
+**Learning:** Icon-only buttons (like those using `variant="ghost" size="icon"`) must have `aria-label` and `title` attributes. Without them, screen readers will announce them as just "button" or read the SVG path, which is confusing for users. The tooltip (`title`) also helps mouse users understand the action.
+**Action:** Always ensure that icon-only buttons include descriptive `aria-label` and `title` attributes.

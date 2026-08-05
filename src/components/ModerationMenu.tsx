@@ -93,7 +93,7 @@ export function ModerationMenu({ user }: ModerationMenuProps) {
     <>
     <DropdownMenu>
       <DropdownMenuTrigger render={
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" aria-label="Moderation actions" title="Moderation actions">
           <ShieldAlert className="h-4 w-4" />
           <span className="sr-only">Moderation actions</span>
         </Button>
