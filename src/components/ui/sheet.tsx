@@ -62,7 +62,7 @@ function SheetContent({
             data-slot="sheet-close"
             render={
               <Button
-                variant="ghost"
+                variant="ghost" aria-label="Close" title="Close"
                 className="absolute top-4 right-4"
                 size="icon-sm"
               />
