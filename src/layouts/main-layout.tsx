@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Outlet } from "react-router"
@@ -11,7 +12,9 @@ export function MainLayout() {
           <SidebarTrigger />
         </div>
         <div className="p-4">
-          <Outlet />
+          <Suspense>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
     </SidebarProvider>

@@ -1,15 +1,31 @@
+import { lazy } from "react"
 import { Routes, Route, Navigate } from "react-router"
 import { useAuthStore } from "@/store/auth"
 import { MainLayout } from "@/layouts/main-layout"
-import { LoginPage } from "@/pages/LoginPage"
-import { RegisterPage } from "@/pages/RegisterPage"
-import { TimelinePage } from "@/pages/TimelinePage"
-import { StatusPage } from "@/pages/StatusPage"
-import { ListsPage } from "@/pages/ListsPage"
-import NotificationsPage from "@/pages/NotificationsPage"
-import AboutPage from "@/pages/AboutPage"
-import { ProfilePage } from "@/pages/ProfilePage"
-import { SettingsPage } from "@/pages/SettingsPage"
+
+const TimelinePage = lazy(() =>
+  import("@/pages/TimelinePage").then((m) => ({ default: m.TimelinePage })),
+)
+const StatusPage = lazy(() =>
+  import("@/pages/StatusPage").then((m) => ({ default: m.StatusPage })),
+)
+const ListsPage = lazy(() =>
+  import("@/pages/ListsPage").then((m) => ({ default: m.ListsPage })),
+)
+const NotificationsPage = lazy(() => import("@/pages/NotificationsPage"))
+const AboutPage = lazy(() => import("@/pages/AboutPage"))
+const ProfilePage = lazy(() =>
+  import("@/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
+)
+const SettingsPage = lazy(() =>
+  import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
+)
+const LoginPage = lazy(() =>
+  import("@/pages/LoginPage").then((m) => ({ default: m.LoginPage })),
+)
+const RegisterPage = lazy(() =>
+  import("@/pages/RegisterPage").then((m) => ({ default: m.RegisterPage })),
+)
 
 function App() {
   const { user } = useAuthStore()
