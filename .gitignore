@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# This project uses pnpm; keep only pnpm-lock.yaml
+package-lock.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
