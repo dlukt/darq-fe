@@ -1,4 +1,3 @@
-import path from "path"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig, loadEnv } from "vite"
@@ -12,7 +11,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": new URL("./src", import.meta.url).pathname,
       },
     },
     server: {

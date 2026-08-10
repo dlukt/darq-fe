@@ -1,6 +1,7 @@
 import { apiClient, BASE_URL } from './client'
 import type { Status } from '@/components/StatusCard'
 import type { User } from '@/store/auth'
+import { useAuthStore } from '@/store/auth'
 
 export const ENDPOINTS = {
   oauthToken: '/oauth/token',
@@ -392,7 +393,6 @@ export async function tagUser(nickname: string, tag: string) {
 
 export async function untagUser(nickname: string, tag: string) {
   // apiClient.delete might not support body in our implementation, so we use a custom fetch or extend apiClient
-  const { useAuthStore } = await import('@/store/auth')
   const { token, instanceUrl } = useAuthStore.getState()
   
   if (!instanceUrl || !token) throw new Error("Not authenticated")
