@@ -5,6 +5,7 @@ import { fetchHomeTimeline, fetchLocalTimeline, fetchFederatedTimeline, fetchBoo
 import { StatusCard } from "@/components/StatusCard"
 import { StatusComposer } from "@/components/StatusComposer"
 import { ListAccounts } from "@/components/ListAccounts"
+import { ScrollToTopButton } from "@/components/ScrollToTopButton"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
@@ -65,6 +66,8 @@ export function TimelinePage({ type }: TimelinePageProps) {
   const displayTitle = type === "list" && listData ? listData.title : title
 
   useDocumentTitle(displayTitle)
+
+  const showScrollToTop = type === "home" || type === "local" || type === "federated"
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
@@ -130,6 +133,8 @@ export function TimelinePage({ type }: TimelinePageProps) {
           />
         </div>
       )}
+
+      {showScrollToTop && <ScrollToTopButton />}
     </div>
   )
 }
