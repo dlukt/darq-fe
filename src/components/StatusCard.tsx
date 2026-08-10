@@ -26,7 +26,15 @@ import {
   SmilePlus, 
   MoreHorizontal,
   Quote,
-  Bookmark
+  Bookmark,
+  VolumeX,
+  Volume2,
+  Copy,
+  EyeOff,
+  ExternalLink,
+  Edit3,
+  Trash2,
+  Flag
 } from "lucide-react"
 
 export interface MediaAttachment {
@@ -708,6 +716,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
               e.stopPropagation()
               muteMutation.mutate()
             }}>
+              {muted ? <Volume2 className="mr-2 h-4 w-4" /> : <VolumeX className="mr-2 h-4 w-4" />}
               {muted ? "Unmute conversation" : "Mute conversation"}
             </DropdownMenuItem>
             {(url || uri) && (
@@ -718,6 +727,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                   navigator.clipboard.writeText(link)
                 }
               }}>
+                <Copy className="mr-2 h-4 w-4" />
                 Copy link to post
               </DropdownMenuItem>
             )}
@@ -726,6 +736,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
               e.stopPropagation()
               setIsHidden(true)
             }}>
+              <EyeOff className="mr-2 h-4 w-4" />
               Hide for me
             </DropdownMenuItem>
             
@@ -734,6 +745,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                 e.stopPropagation()
                 window.open(url || uri, '_blank', 'noopener,noreferrer')
               }}>
+                <ExternalLink className="mr-2 h-4 w-4" />
                 External source
               </DropdownMenuItem>
             )}
@@ -743,6 +755,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                 e.stopPropagation()
                 editSourceMutation.mutate()
               }} disabled={editSourceMutation.isPending}>
+                <Edit3 className="mr-2 h-4 w-4" />
                 {editSourceMutation.isPending ? "Loading edit..." : "Edit post"}
               </DropdownMenuItem>
             )}
@@ -754,6 +767,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                   setShowDeleteConfirm(true)
                 }}
               >
+                <Trash2 className="mr-2 h-4 w-4" />
                 Delete post
               </DropdownMenuItem>
             )}
@@ -762,6 +776,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                 e.stopPropagation()
                 console.log('Report post clicked')
               }}>
+                <Flag className="mr-2 h-4 w-4" />
                 Report
               </DropdownMenuItem>
             )}
