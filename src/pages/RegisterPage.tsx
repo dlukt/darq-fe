@@ -209,6 +209,7 @@ export function RegisterPage() {
                     onChange={(e) => setCaptchaAnswer(e.target.value)}
                     required
                     placeholder="Enter the text above"
+                    aria-label="Captcha answer"
                   />
                 </div>
               </div>

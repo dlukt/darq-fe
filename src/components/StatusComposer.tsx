@@ -275,7 +275,8 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                 render={({ field }) => (
                   <Input 
                     {...field}
-                    placeholder="Content Warning (optional)" 
+                    placeholder="Content Warning (optional)"
+                    aria-label="Content Warning"
                     className="bg-muted/50 border-dashed"
                   />
                 )}
@@ -289,6 +290,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                 <Textarea
                   {...field}
                   placeholder={showCW ? "Type your hidden message here..." : "What's on your mind?"}
+                  aria-label="Status content"
                   className="resize-none min-h-[100px] text-base border-0 focus-visible:ring-0 p-0"
                   onKeyDown={handleKeyDown}
                   disabled={submitMutation.isPending}
@@ -343,6 +345,7 @@ export function StatusComposer({ editId, inReplyToId, quoteId, initialContent = 
                           <Input 
                             {...field}
                             placeholder={`Choice ${i + 1}`}
+                            aria-label={`Poll choice ${i + 1}`}
                             className="bg-background"
                           />
                         )}

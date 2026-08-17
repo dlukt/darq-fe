@@ -64,6 +64,7 @@ export function ListAccounts({ listId }: ListAccountsProps) {
             <h4 className="text-sm font-semibold text-muted-foreground">Add new accounts</h4>
             <Input
               placeholder="Search for accounts..."
+              aria-label="Search for accounts"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

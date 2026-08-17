@@ -62,6 +62,7 @@ export function ListsPage() {
         <div className="flex gap-2">
           <Input
             placeholder="New list name..."
+            aria-label="New list name"
             value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
             disabled={createMutation.isPending}
