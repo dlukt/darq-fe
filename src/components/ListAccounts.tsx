@@ -1,10 +1,21 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { fetchListAccounts, searchAccounts, addAccountsToList, removeAccountsFromList } from "@/api/endpoints"
+import {
+  fetchListAccounts,
+  searchAccounts,
+  addAccountsToList,
+  removeAccountsFromList,
+} from "@/api/endpoints"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { UserPlus, UserMinus, Settings, Loader2 } from "lucide-react"
 
 interface ListAccountsProps {
@@ -36,7 +47,8 @@ export function ListAccounts({ listId }: ListAccountsProps) {
   })
 
   const removeMutation = useMutation({
-    mutationFn: (accountId: string) => removeAccountsFromList(listId, [accountId]),
+    mutationFn: (accountId: string) =>
+      removeAccountsFromList(listId, [accountId]),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listAccounts", listId] })
       setAccountToRemove(null)
@@ -49,51 +61,91 @@ export function ListAccounts({ listId }: ListAccountsProps) {
 
   return (
     <Dialog>
-      <DialogTrigger render={<Button variant="outline" size="sm" className="gap-2" />}>
+      <DialogTrigger
+        render={<Button variant="outline" size="sm" className="gap-2" />}
+      >
         <Settings className="h-4 w-4" />
         Manage Accounts
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className="flex max-h-[80vh] max-w-md flex-col">
         <DialogHeader>
           <DialogTitle>Manage List Accounts</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pr-2 space-y-6">
+        <div className="flex-1 space-y-6 overflow-y-auto pr-2">
           {/* Search and Add */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-muted-foreground">Add new accounts</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground">
+              Add new accounts
+            </h4>
             <Input
               placeholder="Search for accounts..."
+              aria-label="Search for accounts"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <div className="flex items-center space-x-2">
-              <Checkbox id="following-only" checked={followingOnly} onCheckedChange={(c) => setFollowingOnly(c === true)} />
-              <label htmlFor="following-only" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-muted-foreground">
+              <Checkbox
+                id="following-only"
+                checked={followingOnly}
+                onCheckedChange={(c) => setFollowingOnly(c === true)}
+              />
+              <label
+                htmlFor="following-only"
+                className="cursor-pointer text-sm leading-none font-medium text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
                 Limit to Following
               </label>
             </div>
-            {searchLoading && <div className="text-center text-sm text-muted-foreground">Searching...</div>}
+            {searchLoading && (
+              <div className="text-center text-sm text-muted-foreground">
+                Searching...
+              </div>
+            )}
             {searchResults && searchResults.length > 0 && (
-              <div className="space-y-2 border rounded-md p-2 max-h-48 overflow-y-auto">
+              <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border p-2">
                 {searchResults.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-md">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between rounded-md p-2 hover:bg-muted/50"
+                  >
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={user.avatar} alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
+                      <img
+                        src={user.avatar}
+                        alt=""
+                        className="h-8 w-8 flex-shrink-0 rounded-full"
+                      />
                       <div className="truncate">
-                        <p className="text-sm font-medium truncate">{user.display_name || user.username}</p>
-                        <p className="text-xs text-muted-foreground truncate">@{user.acct}</p>
+                        <p className="truncate text-sm font-medium">
+                          {user.display_name || user.username}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          @{user.acct}
+                        </p>
                       </div>
                     </div>
                     <Button
-                      variant={isAccountInList(user.id) ? "secondary" : "default"}
+                      variant={
+                        isAccountInList(user.id) ? "secondary" : "default"
+                      }
                       size="sm"
-                      disabled={isAccountInList(user.id) || addMutation.isPending}
+                      disabled={
+                        isAccountInList(user.id) || addMutation.isPending
+                      }
                       onClick={() => addMutation.mutate(user.id)}
-                      aria-label={isAccountInList(user.id) ? `Already added ${user.display_name || user.username}` : `Add ${user.display_name || user.username} to list`}
-                      title={isAccountInList(user.id) ? "Already added" : "Add to list"}
+                      aria-label={
+                        isAccountInList(user.id)
+                          ? `Already added ${user.display_name || user.username}`
+                          : `Add ${user.display_name || user.username} to list`
+                      }
+                      title={
+                        isAccountInList(user.id)
+                          ? "Already added"
+                          : "Add to list"
+                      }
                     >
-                      {addMutation.isPending && addMutation.variables === user.id ? (
+                      {addMutation.isPending &&
+                      addMutation.variables === user.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : isAccountInList(user.id) ? (
                         "Added"
@@ -105,30 +157,50 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                 ))}
               </div>
             )}
-            {searchResults && searchResults.length === 0 && searchQuery.length > 2 && !searchLoading && (
-              <div className="text-center text-sm text-muted-foreground">No accounts found.</div>
-            )}
+            {searchResults &&
+              searchResults.length === 0 &&
+              searchQuery.length > 2 &&
+              !searchLoading && (
+                <div className="text-center text-sm text-muted-foreground">
+                  No accounts found.
+                </div>
+              )}
           </div>
 
           {/* Current Accounts */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-muted-foreground">Current accounts ({accounts?.length || 0})</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground">
+              Current accounts ({accounts?.length || 0})
+            </h4>
             {accountsLoading ? (
-              <div className="text-center text-sm text-muted-foreground">Loading accounts...</div>
+              <div className="text-center text-sm text-muted-foreground">
+                Loading accounts...
+              </div>
             ) : (
               <div className="space-y-2">
                 {accounts?.length === 0 && (
-                  <div className="text-center text-sm text-muted-foreground py-4 border rounded-md">
+                  <div className="rounded-md border py-4 text-center text-sm text-muted-foreground">
                     No accounts in this list yet.
                   </div>
                 )}
                 {accounts?.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-2 border rounded-md bg-card">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between rounded-md border bg-card p-2"
+                  >
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={user.avatar} alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
+                      <img
+                        src={user.avatar}
+                        alt=""
+                        className="h-8 w-8 flex-shrink-0 rounded-full"
+                      />
                       <div className="truncate">
-                        <p className="text-sm font-medium truncate">{user.display_name || user.username}</p>
-                        <p className="text-xs text-muted-foreground truncate">@{user.acct}</p>
+                        <p className="truncate text-sm font-medium">
+                          {user.display_name || user.username}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          @{user.acct}
+                        </p>
                       </div>
                     </div>
                     {accountToRemove === user.id ? (
@@ -147,7 +219,11 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                           onClick={() => removeMutation.mutate(user.id)}
                           disabled={removeMutation.isPending}
                         >
-                          {removeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : "Confirm"}
+                          {removeMutation.isPending ? (
+                            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                          ) : (
+                            "Confirm"
+                          )}
                         </Button>
                       </div>
                     ) : (
@@ -159,7 +235,8 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                         title="Remove from list"
                         aria-label="Remove from list"
                       >
-                        {removeMutation.isPending && removeMutation.variables === user.id ? (
+                        {removeMutation.isPending &&
+                        removeMutation.variables === user.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <UserMinus className="h-4 w-4" />
