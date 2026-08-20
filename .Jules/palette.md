@@ -15,3 +15,6 @@
 ## 2024-03-24 - Missing ARIA Labels on Icon-only Buttons
 **Learning:** Icon-only buttons (like those using `variant="ghost" size="icon"`) must have `aria-label` and `title` attributes. Without them, screen readers will announce them as just "button" or read the SVG path, which is confusing for users. The tooltip (`title`) also helps mouse users understand the action.
 **Action:** Always ensure that icon-only buttons include descriptive `aria-label` and `title` attributes.
+## 2024-05-18 - Missing Aria Labels on Placeholder-Only Inputs
+**Learning:** Found inputs in `ListsPage` and `ListAccounts` that relied entirely on placeholders, breaking screen reader accessibility.
+**Action:** Always provide explicit `aria-label` attributes for text inputs (like `Input` or `Textarea`) that lack visually associated `<label>` elements.

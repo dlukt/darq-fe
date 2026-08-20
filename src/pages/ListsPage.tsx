@@ -61,6 +61,7 @@ export function ListsPage() {
         <h2 className="text-lg font-semibold">Create New List</h2>
         <div className="flex gap-2">
           <Input
+            aria-label="New list name"
             placeholder="New list name..."
             value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
