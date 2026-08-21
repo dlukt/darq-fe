@@ -18,3 +18,6 @@
 ## 2024-05-18 - Missing Aria Labels on Placeholder-Only Inputs
 **Learning:** Found inputs in `ListsPage` and `ListAccounts` that relied entirely on placeholders, breaking screen reader accessibility.
 **Action:** Always provide explicit `aria-label` attributes for text inputs (like `Input` or `Textarea`) that lack visually associated `<label>` elements.
+## 2024-08-16 - Text Inputs Relying on Placeholders Need ARIA Labels
+**Learning:** Inputs (like `Input` or `Textarea`) that don't have explicit visible labels and rely solely on the `placeholder` attribute are not always reliably announced by screen readers, making them inaccessible.
+**Action:** Ensure all text inputs without a visually associated `<label>` component include an explicit `aria-label` attribute describing their purpose.
