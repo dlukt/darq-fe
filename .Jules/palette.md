@@ -18,3 +18,6 @@
 ## 2024-08-16 - Text Inputs Relying on Placeholders Need ARIA Labels
 **Learning:** Inputs (like `Input` or `Textarea`) that don't have explicit visible labels and rely solely on the `placeholder` attribute are not always reliably announced by screen readers, making them inaccessible.
 **Action:** Ensure all text inputs without a visually associated `<label>` component include an explicit `aria-label` attribute describing their purpose.
+## 2024-05-18 - Replacing text loading states with visual indicators
+**Learning:** Purely text-based loading states (e.g. "Loading lists...") are easy to overlook visually and don't provide the expected modern app feedback. Replacing them with an animated spinner (`Loader2` from `lucide-react`) significantly improves the perceived responsiveness of async actions.
+**Action:** Always scan for generic text loading indicators (`isLoading && <div>Loading...</div>`) and upgrade them to use animated SVG spinners paired with `.sr-only` text for screen readers.

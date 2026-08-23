@@ -61,6 +61,7 @@ export function ListsPage() {
         <h2 className="text-lg font-semibold">Create New List</h2>
         <div className="flex gap-2">
           <Input
+            aria-label="New list name"
             placeholder="New list name..."
             value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
@@ -82,7 +83,8 @@ export function ListsPage() {
 
       {isLoading && (
         <div className="flex justify-center p-8 text-muted-foreground">
-          Loading lists...
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="sr-only">Loading lists...</span>
         </div>
       )}
 
