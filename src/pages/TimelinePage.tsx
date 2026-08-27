@@ -9,6 +9,7 @@ import { ScrollToTopButton } from "@/components/ScrollToTopButton"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
+import { Loader2 } from "lucide-react"
 
 interface TimelinePageProps {
   type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list" | "tag"
@@ -90,7 +91,8 @@ export function TimelinePage({ type }: TimelinePageProps) {
 
       {isLoading && !isAuthRequired && (
         <div className="flex justify-center p-8 text-muted-foreground">
-          Loading timeline...
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="sr-only">Loading timeline...</span>
         </div>
       )}
 

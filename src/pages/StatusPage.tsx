@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { useParams, useNavigate } from "react-router"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 
 import { fetchStatus, fetchStatusContext } from "@/api/endpoints"
 import { StatusCard } from "@/components/StatusCard"
@@ -40,7 +40,8 @@ export function StatusPage() {
   if (isStatusLoading) {
     return (
       <div className="flex h-40 items-center justify-center">
-        <p className="text-muted-foreground animate-pulse">Loading status...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="sr-only">Loading status...</span>
       </div>
     )
   }
@@ -79,7 +80,8 @@ export function StatusPage() {
 
         {isContextLoading ? (
           <div className="flex h-20 items-center justify-center">
-            <p className="text-sm text-muted-foreground animate-pulse">Loading replies...</p>
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <span className="sr-only">Loading replies...</span>
           </div>
         ) : (
           <div className="flex flex-col">
