@@ -1,23 +1,3 @@
-## 2024-05-18 - [ARIA Labels for Icon Buttons]
-**Learning:** Icon-only buttons often miss `aria-label`, as seen in ListAccounts component, making it hard for screen readers to interpret.
-**Action:** Always add explicit `aria-label` attribute describing the action for all icon-only buttons.
-
-## 2024-05-19 - [Confirmation for Destructive Actions]
-**Learning:** Actions like "Delete post" previously executed immediately without confirmation, causing frustration due to accidental clicks. While native `window.confirm` is easy to implement, it is jarring and inconsistent with the app's UI. Accessible `Dialog` components are preferred.
-**Action:** Always add a confirmation step using a dedicated, accessible UI modal dialog for destructive user actions such as deletions to prevent accidental data loss and maintain a cohesive UX.
-
-## 2024-07-22 - Replacing native browser dialogs with accessible components
-**Learning:** The native `window.confirm()` or `confirm()` dialog stops JS execution and can be inaccessible to screen readers, while also jarring the user out of the application experience. The UI library's dialog provides a much smoother, integrated, and accessible experience for destructive actions like account deletion.
-**Action:** When working on administrative or settings features that include destructive actions, always check if they are using native dialogs. If so, plan to upgrade them to accessible modal components from the design system.
-## 2024-03-24 - Interactive Component Accessibility
-**Learning:** Found that entire custom UI cards acting as clickable wrappers (like `StatusCard.tsx` wrapping navigation logic via `onClick`) are completely invisible to keyboard users traversing timelines.
-**Action:** Always ensure interactive container components have a `role` (e.g. `article` or `button`), a `tabIndex={0}`, an `onKeyDown` handler listening to `Enter` and `Space`, and `focus-visible` styles (`focus-visible:ring-2`, etc.). Furthermore, the `onKeyDown` handler must check `e.target` and `closest` interactive children (like links or buttons) to stop propagation and prevent triggering the wrapper action unexpectedly.
-## 2024-03-24 - Missing ARIA Labels on Icon-only Buttons
-**Learning:** Icon-only buttons (like those using `variant="ghost" size="icon"`) must have `aria-label` and `title` attributes. Without them, screen readers will announce them as just "button" or read the SVG path, which is confusing for users. The tooltip (`title`) also helps mouse users understand the action.
-**Action:** Always ensure that icon-only buttons include descriptive `aria-label` and `title` attributes.
-## 2024-08-16 - Text Inputs Relying on Placeholders Need ARIA Labels
-**Learning:** Inputs (like `Input` or `Textarea`) that don't have explicit visible labels and rely solely on the `placeholder` attribute are not always reliably announced by screen readers, making them inaccessible.
-**Action:** Ensure all text inputs without a visually associated `<label>` component include an explicit `aria-label` attribute describing their purpose.
-## 2024-05-18 - Replacing text loading states with visual indicators
-**Learning:** Purely text-based loading states (e.g. "Loading lists...") are easy to overlook visually and don't provide the expected modern app feedback. Replacing them with an animated spinner (`Loader2` from `lucide-react`) significantly improves the perceived responsiveness of async actions.
-**Action:** Always scan for generic text loading indicators (`isLoading && <div>Loading...</div>`) and upgrade them to use animated SVG spinners paired with `.sr-only` text for screen readers.
+## 2024-05-18 - Improved Empty States with Guidance
+**Learning:** Replaced plain text empty states across timeline and notification views with robust empty states that utilize icons and actionable guidance (e.g., "Follow some users or check out the federated timeline to see more content").
+**Action:** When designing or refactoring UI views that deal with potentially empty collections (arrays), always look out for plain text empty states and upgrade them with visual polish (icons, borders) and actionable guidance to improve the user experience.
