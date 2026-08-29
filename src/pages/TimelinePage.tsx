@@ -108,7 +108,9 @@ export function TimelinePage({ type }: TimelinePageProps) {
           <MessageSquareOff className="h-12 w-12 mb-4 text-muted-foreground/50" />
           <h3 className="text-lg font-semibold text-foreground mb-1">No posts to show right now.</h3>
           <p className="text-sm max-w-md">
-            Follow some users or check out the federated timeline to see more content.
+            {type === "federated"
+              ? "Follow more users or explore other instances to see more content."
+              : "Follow some users or check out the federated timeline to see more content."}
           </p>
         </div>
       )}
