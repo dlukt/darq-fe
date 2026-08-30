@@ -21,3 +21,6 @@
 ## 2024-05-18 - Replacing text loading states with visual indicators
 **Learning:** Purely text-based loading states (e.g. "Loading lists...") are easy to overlook visually and don't provide the expected modern app feedback. Replacing them with an animated spinner (`Loader2` from `lucide-react`) significantly improves the perceived responsiveness of async actions.
 **Action:** Always scan for generic text loading indicators (`isLoading && <div>Loading...</div>`) and upgrade them to use animated SVG spinners paired with `.sr-only` text for screen readers.
+## 2024-05-19 - Timeline Empty States
+**Learning:** Replaced plain text empty states across all timelines with a visually engaging component (an icon, bold title, and helpful description). Providing actionable guidance rather than just stating "no data" greatly improves user perception of empty states.
+**Action:** Always map empty states to relevant icons (e.g., from `lucide-react`) and provide a descriptive next step, instead of using a simple text string.

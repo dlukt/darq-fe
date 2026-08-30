@@ -9,7 +9,7 @@ import { ScrollToTopButton } from "@/components/ScrollToTopButton"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
-import { Loader2 } from "lucide-react"
+import { Loader2, Users, MessageSquareOff, Search, Bookmark, Mail, ListFilter, Hash } from "lucide-react"
 
 interface TimelinePageProps {
   type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list" | "tag"
@@ -70,6 +70,17 @@ export function TimelinePage({ type }: TimelinePageProps) {
 
   const showScrollToTop = type === "home" || type === "local" || type === "federated"
 
+  const emptyStateConfig = {
+    home: { icon: Users, title: "Your home feed is empty", desc: "Follow more people to see their posts here." },
+    local: { icon: MessageSquareOff, title: "No local posts yet", desc: "Be the first to post on this server!" },
+    federated: { icon: Search, title: "Nothing to see here", desc: "The federated timeline is currently empty." },
+    bookmarks: { icon: Bookmark, title: "No bookmarks yet", desc: "Save posts to read them later." },
+    direct: { icon: Mail, title: "No direct messages", desc: "You haven't received any direct messages yet." },
+    list: { icon: ListFilter, title: "This list is empty", desc: "Add people to this list to see their posts." },
+    tag: { icon: Hash, title: "No posts for this tag", desc: "Try searching for a different tag." },
+  }[type]
+  const EmptyIcon = emptyStateConfig.icon
+
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="flex items-center justify-between mb-6">
@@ -104,8 +115,12 @@ export function TimelinePage({ type }: TimelinePageProps) {
       )}
 
       {!isLoading && !isError && !isAuthRequired && statuses.length === 0 && (
-        <div className="text-center p-8 text-muted-foreground">
-          No posts to show right now.
+        <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-card/50 mt-4">
+          <div className="bg-muted p-4 rounded-full mb-4">
+            <EmptyIcon className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-semibold mb-1">{emptyStateConfig.title}</p>
+          <p className="text-sm text-muted-foreground">{emptyStateConfig.desc}</p>
         </div>
       )}
 
