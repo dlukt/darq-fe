@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { markNotificationsAsRead, type Notification } from "@/api/endpoints"
 import { NotificationCard } from "@/components/NotificationCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, CheckCheck } from "lucide-react"
+import { Loader2, CheckCheck, AtSign, Heart, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/hooks/useNotifications"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
@@ -94,8 +94,10 @@ export default function NotificationsPage() {
           ) : mentions.length > 0 ? (
             mentions.map((n) => <NotificationCard key={n.id} notification={n} />)
           ) : (
-            <div className="text-center p-8 text-muted-foreground border rounded-md border-dashed">
-              No mentions yet.
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed bg-muted/10">
+              <AtSign className="h-10 w-10 mb-3 text-muted-foreground/50" />
+              <h3 className="text-base font-semibold text-foreground mb-1">No mentions yet.</h3>
+              <p className="text-sm">When someone mentions you, it will show up here.</p>
             </div>
           )}
         </TabsContent>
@@ -108,8 +110,10 @@ export default function NotificationsPage() {
           ) : interactions.length > 0 ? (
             interactions.map((n) => <NotificationCard key={n.id} notification={n} />)
           ) : (
-            <div className="text-center p-8 text-muted-foreground border rounded-md border-dashed">
-              No repeats or favorites yet.
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed bg-muted/10">
+              <Heart className="h-10 w-10 mb-3 text-muted-foreground/50" />
+              <h3 className="text-base font-semibold text-foreground mb-1">No repeats or favorites yet.</h3>
+              <p className="text-sm">When someone interacts with your posts, you'll see it here.</p>
             </div>
           )}
         </TabsContent>
@@ -122,8 +126,10 @@ export default function NotificationsPage() {
           ) : follows.length > 0 ? (
             follows.map((n) => <NotificationCard key={n.id} notification={n} />)
           ) : (
-            <div className="text-center p-8 text-muted-foreground border rounded-md border-dashed">
-              No new follows yet.
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed bg-muted/10">
+              <UserPlus className="h-10 w-10 mb-3 text-muted-foreground/50" />
+              <h3 className="text-base font-semibold text-foreground mb-1">No new follows yet.</h3>
+              <p className="text-sm">When someone follows you, they'll appear here.</p>
             </div>
           )}
         </TabsContent>

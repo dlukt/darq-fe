@@ -9,7 +9,7 @@ import { ScrollToTopButton } from "@/components/ScrollToTopButton"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@/components/ui/button"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
-import { Loader2 } from "lucide-react"
+import { Loader2, MessageSquareOff } from "lucide-react"
 
 interface TimelinePageProps {
   type: "home" | "local" | "federated" | "bookmarks" | "direct" | "list" | "tag"
@@ -104,8 +104,14 @@ export function TimelinePage({ type }: TimelinePageProps) {
       )}
 
       {!isLoading && !isError && !isAuthRequired && statuses.length === 0 && (
-        <div className="text-center p-8 text-muted-foreground">
-          No posts to show right now.
+        <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed mt-4 bg-muted/10">
+          <MessageSquareOff className="h-12 w-12 mb-4 text-muted-foreground/50" />
+          <h3 className="text-lg font-semibold text-foreground mb-1">No posts to show right now.</h3>
+          <p className="text-sm max-w-md">
+            {type === "federated"
+              ? "Follow more users or explore other instances to see more content."
+              : "Follow some users or check out the federated timeline to see more content."}
+          </p>
         </div>
       )}
 
