@@ -74,7 +74,12 @@ export function ListAccounts({ listId }: ListAccountsProps) {
                 Limit to Following
               </label>
             </div>
-            {searchLoading && <div className="text-center text-sm text-muted-foreground">Searching...</div>}
+            {searchLoading && (
+              <div className="flex justify-center p-2 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="sr-only">Searching...</span>
+              </div>
+            )}
             {searchResults && searchResults.length > 0 && (
               <div className="space-y-2 border rounded-md p-2 max-h-48 overflow-y-auto">
                 {searchResults.map((user) => (
@@ -115,7 +120,10 @@ export function ListAccounts({ listId }: ListAccountsProps) {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-muted-foreground">Current accounts ({accounts?.length || 0})</h4>
             {accountsLoading ? (
-              <div className="text-center text-sm text-muted-foreground">Loading accounts...</div>
+              <div className="flex justify-center p-4 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="sr-only">Loading accounts...</span>
+              </div>
             ) : (
               <div className="space-y-2">
                 {accounts?.length === 0 && (

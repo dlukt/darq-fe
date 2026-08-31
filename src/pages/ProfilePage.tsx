@@ -27,6 +27,7 @@ import { StatusCard } from '@/components/StatusCard'
 import { UserPopover } from '@/components/UserPopover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { Loader2 } from 'lucide-react'
 
 function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 'replies' | 'media' | 'favorites' }) {
   const { data: pinnedStatuses, isLoading: isPinnedLoading } = useQuery({
@@ -58,7 +59,12 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
 
   const statuses = data?.pages.flat() || []
 
-  if (isLoading || (type === 'posts' && isPinnedLoading)) return <div className="p-8 text-center text-muted-foreground">Loading statuses...</div>
+  if (isLoading || (type === 'posts' && isPinnedLoading)) return (
+    <div className="flex justify-center p-8 text-muted-foreground">
+      <Loader2 className="h-8 w-8 animate-spin" />
+      <span className="sr-only">Loading statuses...</span>
+    </div>
+  )
   if (isError) return <div className="p-8 text-center text-red-500">Failed to load statuses.</div>
   if (statuses.length === 0 && (!pinnedStatuses || pinnedStatuses.length === 0)) {
     return <div className="p-8 text-center text-muted-foreground">No statuses found.</div>
@@ -108,7 +114,12 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
         components={{
           Footer: () => (
             <div className="py-4 text-center text-muted-foreground">
-              {isFetchingNextPage ? "Loading more..." : !hasNextPage ? "No more posts" : ""}
+                  {isFetchingNextPage ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading more...
+                    </span>
+                  ) : !hasNextPage ? "No more posts" : ""}
             </div>
           ),
         }}
@@ -134,7 +145,12 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
 
   const users = data?.pages.flat() || []
 
-  if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading users...</div>
+  if (isLoading) return (
+    <div className="flex justify-center p-8 text-muted-foreground">
+      <Loader2 className="h-8 w-8 animate-spin" />
+      <span className="sr-only">Loading users...</span>
+    </div>
+  )
   if (isError) {
     if (error instanceof Error && error.message.includes('403')) {
       return <div className="p-8 text-center text-muted-foreground">This list is hidden by the user.</div>
@@ -182,7 +198,12 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
         components={{
           Footer: () => (
             <div className="py-4 text-center text-muted-foreground">
-              {isFetchingNextPage ? "Loading more..." : ""}
+                  {isFetchingNextPage ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading more...
+                    </span>
+                  ) : ""}
             </div>
           ),
         }}
@@ -233,7 +254,12 @@ function ProfileTagList() {
     retry: false
   })
 
-  if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading hashtags...</div>
+  if (isLoading) return (
+    <div className="flex justify-center p-8 text-muted-foreground">
+      <Loader2 className="h-8 w-8 animate-spin" />
+      <span className="sr-only">Loading hashtags...</span>
+    </div>
+  )
   if (isError) return <div className="p-8 text-center text-red-500">Failed to load hashtags.</div>
   if (!tags || tags.length === 0) return <div className="p-8 text-center text-muted-foreground">No followed hashtags.</div>
 
