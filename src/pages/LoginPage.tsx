@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 import { ensureAppRegistered } from "@/api/auth"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
@@ -109,7 +110,14 @@ export function LoginPage() {
               className="w-full"
               disabled={loginMutation.isPending}
             >
-              {loginMutation.isPending ? "Logging in..." : "Login"}
+              {loginMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="sr-only">Logging in...</span>
+                </>
+              ) : (
+                "Login"
+              )}
             </Button>
             <div className="text-center text-sm text-muted-foreground w-full">
               Don't have an account?{" "}

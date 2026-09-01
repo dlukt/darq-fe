@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 export function RegisterPage() {
@@ -221,7 +222,14 @@ export function RegisterPage() {
               className="w-full"
               disabled={registerMutation.isPending}
             >
-              {registerMutation.isPending ? "Registering..." : "Sign Up"}
+              {registerMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="sr-only">Registering...</span>
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
             <div className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
