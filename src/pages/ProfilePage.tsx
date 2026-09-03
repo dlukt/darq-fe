@@ -27,7 +27,7 @@ import { StatusCard } from '@/components/StatusCard'
 import { UserPopover } from '@/components/UserPopover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageSquareOff, Users, Hash } from 'lucide-react'
 
 function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 'replies' | 'media' | 'favorites' }) {
   const { data: pinnedStatuses, isLoading: isPinnedLoading } = useQuery({
@@ -67,7 +67,13 @@ function ProfileTimeline({ userId, type }: { userId: string, type: 'posts' | 're
   )
   if (isError) return <div className="p-8 text-center text-red-500">Failed to load statuses.</div>
   if (statuses.length === 0 && (!pinnedStatuses || pinnedStatuses.length === 0)) {
-    return <div className="p-8 text-center text-muted-foreground">No statuses found.</div>
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed mt-4 bg-muted/10">
+        <MessageSquareOff className="h-12 w-12 mb-4 text-muted-foreground/50" />
+        <h3 className="text-lg font-semibold text-foreground mb-1">No posts to show right now.</h3>
+        <p className="text-sm max-w-md">This user hasn't posted anything yet.</p>
+      </div>
+    )
   }
 
   // Filter out pinned statuses from the main feed so they don't duplicate
@@ -157,7 +163,13 @@ function ProfileFollowList({ userId, type, isUs }: { userId: string, type: 'foll
     }
     return <div className="p-8 text-center text-red-500">Failed to load users.</div>
   }
-  if (users.length === 0) return <div className="p-8 text-center text-muted-foreground">No users found.</div>
+  if (users.length === 0) return (
+    <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed mt-4 bg-muted/10">
+      <Users className="h-12 w-12 mb-4 text-muted-foreground/50" />
+      <h3 className="text-lg font-semibold text-foreground mb-1">No users found.</h3>
+      <p className="text-sm max-w-md">There are no users to display here.</p>
+    </div>
+  )
 
   return (
     <div className="mt-4">
@@ -261,7 +273,13 @@ function ProfileTagList() {
     </div>
   )
   if (isError) return <div className="p-8 text-center text-red-500">Failed to load hashtags.</div>
-  if (!tags || tags.length === 0) return <div className="p-8 text-center text-muted-foreground">No followed hashtags.</div>
+  if (!tags || tags.length === 0) return (
+    <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border rounded-lg border-dashed mt-4 bg-muted/10">
+      <Hash className="h-12 w-12 mb-4 text-muted-foreground/50" />
+      <h3 className="text-lg font-semibold text-foreground mb-1">No followed hashtags.</h3>
+      <p className="text-sm max-w-md">You aren't following any hashtags yet.</p>
+    </div>
+  )
 
   return (
     <div className="flex flex-col gap-4 mt-4">
