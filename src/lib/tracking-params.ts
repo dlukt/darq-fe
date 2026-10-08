@@ -443,7 +443,7 @@ function displayForm(url: string): string {
   } catch {
     // Keep malformed escapes as they are
   }
-  return decoded.replace(/^https?:\/\/(www\.)?/i, "")
+  return decoded.replace(/^(https?:\/\/)?(www\.)?/i, "")
 }
 
 // Link text that spells out the link's own URL is cleaned as well. Mastodon
