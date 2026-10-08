@@ -372,7 +372,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           const target = e.target as HTMLElement
           // Events from portalled popups bubble here through React but aren't inside the card
           if (!e.currentTarget.contains(target)) return
-          if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
+          if (target.closest('a, button, img, video, audio, [role="button"], [data-src]')) return
           navigate(`/status/${status.id}`)
         }}
         onKeyDown={(e) => {
@@ -380,7 +380,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           if (e.key === 'Enter' || e.key === ' ') {
             const target = e.target as HTMLElement
             if (!e.currentTarget.contains(target)) return
-            if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
+            if (target.closest('a, button, img, video, audio, [role="button"], [data-src]')) return
             e.preventDefault()
             navigate(`/status/${status.id}`)
           }
@@ -453,7 +453,11 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
 
             {/* Audio Attachments */}
             {audioAttachments.length > 0 && (
-              <div className="mt-4 space-y-2">
+              <div
+                className="mt-4 space-y-2"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
                 {audioAttachments.map((media) => (
                   <audio
                     key={media.id}
