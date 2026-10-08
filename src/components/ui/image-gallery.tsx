@@ -60,6 +60,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 }) => {
     const [containerWidth, setContainerWidth] = useState(0);
     const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+    const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -93,16 +94,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         };
     }, []);
 
-    const noOfColumns = useMemo(() => {
-        let cols = columns.desktop as number;
-        if (windowSize.width < 768) cols = columns.mobile || 1;
-        else if (windowSize.width < 1024) cols = columns.tablet || 2;
-        
-        // Ensure we don't create more columns than we have images,
-        // so that 1 or 2 images can expand to fill the full container width.
-        return Math.min(cols, Math.max(1, images.length));
-    }, [windowSize.width, columns.mobile, columns.tablet, columns.desktop, images.length]);
-
     // Deterministic dimensions for images that don't have them
     const getFallbackDimensions = useCallback((src: string) => {
         // Simple hash of the src string to get a deterministic index
@@ -122,7 +113,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     }, []);
 
     const processedImages = useMemo(() => {
-        let result = [...images];
+        let result = [...images].filter((image) => !!image?.src);
 
         // Add random dimensions to images that don't have them
         result = result.map((image) => {
@@ -148,8 +139,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         return result;
     }, [images, filterImages, sortImages, getFallbackDimensions]);
 
+    const visibleImages = useMemo(
+        () => processedImages.filter((image) => !failedImages.has(image.src)),
+        [processedImages, failedImages],
+    );
+
+    const noOfColumns = useMemo(() => {
+        let cols = columns.desktop as number;
+        if (windowSize.width < 768) cols = columns.mobile || 1;
+        else if (windowSize.width < 1024) cols = columns.tablet || 2;
+
+        // Ensure we don't create more columns than we have images,
+        // so that 1 or 2 images can expand to fill the full container width.
+        return Math.min(cols, Math.max(1, visibleImages.length));
+    }, [windowSize.width, columns.mobile, columns.tablet, columns.desktop, visibleImages.length]);
+
     const { layout, totalHeight } = useMasonry(
-        processedImages,
+        visibleImages,
         containerWidth,
         {
             gap,
@@ -237,6 +243,17 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         [onImageClick],
     );
 
+    const handleImageError = useCallback((src: string) => {
+        setFailedImages((prev) => {
+            if (prev.has(src)) return prev;
+            const next = new Set(prev);
+            next.add(src);
+            return next;
+        });
+    }, []);
+
+    if (visibleImages.length === 0) return null;
+
     return (
         <div
             ref={containerRef}
@@ -275,6 +292,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                                 type={item.type}
                                 className="w-full h-full"
                                 onClick={() => handleImageClick(item, index)}
+                                onLoadError={() => handleImageError(item.src)}
                             />
                         ) : null}
                     </div>

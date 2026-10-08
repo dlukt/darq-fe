@@ -322,18 +322,29 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
     }
   }
 
-  const galleryImages: ImageItem[] = media_attachments
-    ? media_attachments.map((media) => {
-        const original = media.meta?.original
-        return {
-          src: media.url,
-          alt: media.description || "Media attachment",
-          type: media.type,
-          width: original?.width,
-          height: original?.height,
-        }
-      })
-    : []
+  const galleryImages: ImageItem[] = (media_attachments ?? [])
+    .filter((media) => {
+      if (!media || !media.url) return false
+      // Only visual attachments can be rendered in the gallery.
+      // "unknown" (and "audio") must not become a black zoomable tile.
+      // This also guards against backends that expose a link URL as an
+      // attachment with type "unknown" / mime "application/octet-stream".
+      return media.type === "image" || media.type === "video" || media.type === "gifv"
+    })
+    .map((media) => {
+      const original = media.meta?.original
+      return {
+        src: media.url,
+        alt: media.description || "Media attachment",
+        type: media.type,
+        width: original?.width,
+        height: original?.height,
+      }
+    })
+
+  const audioAttachments = (media_attachments ?? []).filter(
+    (media) => media && media.type === "audio" && !!media.url,
+  )
 
   if (isHidden) {
     return (
@@ -361,7 +372,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           const target = e.target as HTMLElement
           // Events from portalled popups bubble here through React but aren't inside the card
           if (!e.currentTarget.contains(target)) return
-          if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
+          if (target.closest('a, button, img, video, audio, [role="button"], [data-src]')) return
           navigate(`/status/${status.id}`)
         }}
         onKeyDown={(e) => {
@@ -369,7 +380,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           if (e.key === 'Enter' || e.key === ' ') {
             const target = e.target as HTMLElement
             if (!e.currentTarget.contains(target)) return
-            if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
+            if (target.closest('a, button, img, video, audio, [role="button"], [data-src]')) return
             e.preventDefault()
             navigate(`/status/${status.id}`)
           }
@@ -437,6 +448,26 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
             {galleryImages.length > 0 && (
               <div className="mt-4">
                 <ImageGallery images={galleryImages} lazyLoading={true} />
+              </div>
+            )}
+
+            {/* Audio Attachments */}
+            {audioAttachments.length > 0 && (
+              <div
+                className="mt-4 space-y-2"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
+                {audioAttachments.map((media) => (
+                  <audio
+                    key={media.id}
+                    src={media.url}
+                    controls
+                    preload="metadata"
+                    className="w-full"
+                    aria-label={media.description || "Audio attachment"}
+                  />
+                ))}
               </div>
             )}
 
