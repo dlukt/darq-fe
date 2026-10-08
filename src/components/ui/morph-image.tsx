@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 interface MorphImageProps extends HTMLMotionProps<"img"> {
     type?: "image" | "video" | "gifv" | "audio" | "unknown";
+    onLoadError?: () => void;
 }
 
 const MorphImage: React.FC<MorphImageProps> = ({
@@ -20,10 +21,12 @@ const MorphImage: React.FC<MorphImageProps> = ({
     alt,
     onClick,
     type = "image",
+    onLoadError,
     ...props
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     const imageRef = useRef<HTMLImageElement & HTMLVideoElement>(null);
     // Using src as part of the layoutId is crucial to prevent framer-motion from
@@ -51,6 +54,33 @@ const MorphImage: React.FC<MorphImageProps> = ({
 
     if (!mounted) return null;
 
+    // Missing source can never render — avoid an empty (black) tile.
+    if (!src) return null;
+
+    // Unsupported attachment types must not render as a broken image/video tile.
+    if (type === "unknown") return null;
+
+    if (hasError) return null;
+
+    const handleLoadError = () => {
+        setHasError(true);
+        setIsOpen(false);
+        onLoadError?.();
+    };
+
+    if (type === "audio") {
+        return (
+            <audio
+                src={src}
+                controls
+                preload="metadata"
+                className={cn("w-full", className)}
+                aria-label={typeof alt === "string" ? alt : "Audio attachment"}
+                onError={handleLoadError}
+            />
+        );
+    }
+
     const isVideo = type === "video" || type === "gifv";
 
     const thumbnail = isVideo ? (
@@ -61,6 +91,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
                 className,
             )}
             onClick={() => setIsOpen(true)}
+            onError={handleLoadError}
             autoPlay={type === "gifv"}
             loop={type === "gifv"}
             muted
@@ -76,6 +107,7 @@ const MorphImage: React.FC<MorphImageProps> = ({
                 className,
             )}
             onClick={() => setIsOpen(true)}
+            onError={handleLoadError}
             {...props}
         />
     );
