@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useNavigate, Link } from "react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { voteOnPoll, toggleReblogStatus, toggleFavouriteStatus, toggleBookmarkStatus, toggleReaction } from "@/api/endpoints"
@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useAuthStore } from "@/store/auth"
 import { deleteStatus, toggleMuteConversation, fetchStatusSource } from "@/api/endpoints"
 import { useSettingsStore } from "@/store/settings"
+import { RelativeTime } from "@/components/RelativeTime"
+import { stripTrackingFromHtml, stripTrackingParams } from "@/lib/tracking-params"
 
 import { 
   MessageCircle, 
@@ -169,8 +171,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                     user?.role?.name?.toLowerCase() === 'admin' || 
                     user?.role?.name?.toLowerCase() === 'moderator'
 
-  // Format date
-  const dateStr = new Date(created_at).toLocaleString()
+  const cleanContent = useMemo(() => stripTrackingFromHtml(content), [content])
 
   const { showSensitiveMedia, expandContentWarnings } = useSettingsStore()
 
@@ -358,6 +359,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
         onClick={(e) => {
           if (isDetailed) return
           const target = e.target as HTMLElement
+          // Events from portalled popups bubble here through React but aren't inside the card
+          if (!e.currentTarget.contains(target)) return
           if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
           navigate(`/status/${status.id}`)
         }}
@@ -365,6 +368,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           if (isDetailed) return
           if (e.key === 'Enter' || e.key === ' ') {
             const target = e.target as HTMLElement
+            if (!e.currentTarget.contains(target)) return
             if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
             e.preventDefault()
             navigate(`/status/${status.id}`)
@@ -387,7 +391,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           <span className="text-sm text-muted-foreground">
             <Link to={`/@${account.acct}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
               @{account.acct}
-            </Link> &middot; {dateStr}
+            </Link> &middot; <RelativeTime dateTime={created_at} />
           </span>
         </div>
 
@@ -425,7 +429,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
             {/* We use dangerouslySetInnerHTML because Mastodon API returns HTML for content */}
             <div
               className="prose dark:prose-invert wrap-break-words max-w-none text-sm"
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={{ __html: cleanContent }}
               onClick={handleContentClick}
             />
 
@@ -446,7 +450,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
                   />
                 ) : (
                   <a 
-                    href={card.url} 
+                    href={stripTrackingParams(card.url)} 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="block transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

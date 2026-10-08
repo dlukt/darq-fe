@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Repeat, Heart, UserPlus } from "lucide-react"
 import { UserPopover } from "@/components/UserPopover"
 import { Link } from "react-router"
+import { RelativeTime } from "@/components/RelativeTime"
 
 interface NotificationCardProps {
   notification: Notification
@@ -13,7 +14,6 @@ interface NotificationCardProps {
 export function NotificationCard({ notification }: NotificationCardProps) {
   const { type, account, status, created_at, pleroma } = notification
   const displayName = account.display_name || account.username
-  const dateStr = new Date(created_at).toLocaleString()
 
   const isUnread = pleroma?.is_seen === false
   const unreadIndicator = isUnread ? (
@@ -78,7 +78,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
               </span>
             </UserPopover>
             <span>followed you</span>
-            <span className="ml-auto text-xs">{dateStr}</span>
+            <RelativeTime dateTime={created_at} className="ml-auto text-xs" />
           </CardHeader>
           <CardContent className="flex items-center gap-4">
             <UserPopover user={account}>
