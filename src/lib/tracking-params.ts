@@ -414,8 +414,9 @@ export function stripTrackingParams(url: string): string {
   const fragmentStart = url.indexOf("#")
   if (fragmentStart !== -1 && fragmentStart < queryStart) return url
 
-  // "www.youtube.com." (with the DNS root) is the same host
-  const host = /^https?:\/\/(?:[^/?#@]*@)?([^/?#:]+)/i
+  // "www.youtube.com." (with the DNS root) is the same host, and a backslash
+  // ends the host as it does in browsers
+  const host = /^https?:\/\/(?:[^/?#@\\]*@)?([^/?#:\\]+)/i
     .exec(url)?.[1]
     ?.toLowerCase()
     .replace(/\.$/, "")
@@ -430,7 +431,7 @@ export function stripTrackingParams(url: string): string {
   )
   if (kept.length === pairs.length) return url
 
-  const query = kept.filter((pair) => pair !== "").join("&")
+  const query = kept.every((pair) => pair === "") ? "" : kept.join("&")
   return (
     url.slice(0, queryStart) + (query ? `?${query}` : "") + url.slice(queryEnd)
   )
