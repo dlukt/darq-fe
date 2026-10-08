@@ -359,6 +359,8 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
         onClick={(e) => {
           if (isDetailed) return
           const target = e.target as HTMLElement
+          // Events from portalled popups bubble here through React but aren't inside the card
+          if (!e.currentTarget.contains(target)) return
           if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
           navigate(`/status/${status.id}`)
         }}
@@ -366,6 +368,7 @@ export function StatusCard({ status: initialStatus, isDetailed, isAncestor, isDe
           if (isDetailed) return
           if (e.key === 'Enter' || e.key === ' ') {
             const target = e.target as HTMLElement
+            if (!e.currentTarget.contains(target)) return
             if (target.closest('a, button, img, video, [role="button"], [data-src]')) return
             e.preventDefault()
             navigate(`/status/${status.id}`)

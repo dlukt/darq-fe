@@ -361,16 +361,22 @@ const SITE_RULES: SiteRule[] = [
   { domains: ["welt.de"], params: ["cid"] },
 ]
 
+// Second-level labels of country domains such as co.uk or com.au.
+const SECOND_LEVEL_LABELS = ["co", "com"]
+
 function matchesDomain(host: string, domain: string): boolean {
   if (!domain.endsWith(".*")) {
     return host === domain || host.endsWith(`.${domain}`)
   }
 
   // "amazon.*" matches amazon.de, www.amazon.co.uk, smile.amazon.com, ...
-  // but not amazon.example.org.
+  // but not amazon.example.org or amazon.foo.com.
   const labels = host.split(".").reverse()
   const name = domain.slice(0, -2)
-  return labels[1] === name || (labels[2] === name && labels[1].length <= 3)
+  return (
+    labels[1] === name ||
+    (labels[2] === name && SECOND_LEVEL_LABELS.includes(labels[1]))
+  )
 }
 
 function trackingParamMatcher(host: string) {
@@ -423,12 +429,27 @@ export function stripTrackingParams(url: string): string {
   )
 }
 
-// Link text that spells out the URL is cleaned as well. Mastodon splits it
-// over several spans (scheme, first 30 characters, rest), so the cleaned text
-// is written back over the original text nodes at the same offsets.
-function stripLinkText(anchor: HTMLAnchorElement): boolean {
+// Percent-decoded URL without scheme and "www.", to compare link text with
+// the link it belongs to.
+function displayForm(url: string): string {
+  let decoded = url
+  try {
+    decoded = decodeURI(url)
+  } catch {
+    // Keep malformed escapes as they are
+  }
+  return decoded.replace(/^https?:\/\/(www\.)?/i, "")
+}
+
+// Link text that spells out the link's own URL is cleaned as well. Mastodon
+// splits it over several spans (scheme, first 30 characters, rest), so the
+// cleaned text is written back over the original text nodes at the same
+// offsets.
+function stripLinkText(anchor: HTMLAnchorElement, href: string): boolean {
   const text = anchor.textContent ?? ""
-  if (!text.includes("?") || /\s/.test(text)) return false
+  if (!text.includes("?") || displayForm(text) !== displayForm(href)) {
+    return false
+  }
 
   const hasScheme = /^https?:\/\//i.test(text)
   const cleaned = hasScheme
@@ -464,14 +485,14 @@ export function stripTrackingFromHtml(html: string): string {
 
   doc.body.querySelectorAll("a").forEach((anchor) => {
     const href = anchor.getAttribute("href")
-    if (href) {
-      const cleaned = stripTrackingParams(href)
-      if (cleaned !== href) {
-        anchor.setAttribute("href", cleaned)
-        changed = true
-      }
+    if (!href) return
+
+    if (stripLinkText(anchor, href)) changed = true
+    const cleaned = stripTrackingParams(href)
+    if (cleaned !== href) {
+      anchor.setAttribute("href", cleaned)
+      changed = true
     }
-    if (stripLinkText(anchor)) changed = true
   })
 
   return changed ? doc.body.innerHTML : html
