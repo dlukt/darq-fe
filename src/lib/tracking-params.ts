@@ -370,12 +370,14 @@ function matchesDomain(host: string, domain: string): boolean {
   }
 
   // "amazon.*" matches amazon.de, www.amazon.co.uk, smile.amazon.com, ...
-  // but not amazon.example.org or amazon.foo.com.
+  // but not amazon.example.org, amazon.foo.com or amazon.co.com.
   const labels = host.split(".").reverse()
   const name = domain.slice(0, -2)
   return (
     labels[1] === name ||
-    (labels[2] === name && SECOND_LEVEL_LABELS.includes(labels[1]))
+    (labels[2] === name &&
+      SECOND_LEVEL_LABELS.includes(labels[1]) &&
+      labels[0].length === 2)
   )
 }
 
@@ -420,7 +422,10 @@ export function stripTrackingParams(url: string): string {
   const queryEnd = fragmentStart === -1 ? url.length : fragmentStart
   const isTracking = trackingParamMatcher(host)
   const pairs = url.slice(queryStart + 1, queryEnd).split("&")
-  const kept = pairs.filter((pair) => !isTracking(paramName(pair)))
+  // A ";" may separate further parameters, so such pairs are left alone.
+  const kept = pairs.filter(
+    (pair) => pair.includes(";") || !isTracking(paramName(pair))
+  )
   if (kept.length === pairs.length) return url
 
   const query = kept.filter((pair) => pair !== "").join("&")
